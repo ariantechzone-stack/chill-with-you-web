@@ -1,23 +1,15 @@
-/* =========================
-   Scene
-========================= */
+/* Day/Night Background */
 #scene {
-  min-height: 100vh;
   background: linear-gradient(#eaeef3, #cfd9df);
   transition: background 1.2s ease, filter 1.2s ease;
 }
 
-/* =========================
-   Night Mode
-========================= */
 #scene.night {
   background: radial-gradient(circle at top, #1b2735, #090a0f);
   filter: brightness(0.9) saturate(1.1);
 }
 
-/* =========================
-   Rain Visual
-========================= */
+/* Rain */
 .rain {
   position: fixed;
   inset: 0;
@@ -41,4 +33,51 @@
 @keyframes rain {
   from { background-position: 0 0; }
   to   { background-position: 0 100%; }
+}
+
+/* Stars overlay */
+#scene::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  background-image: radial-gradient(white 1px, transparent 1px);
+  background-size: 3px 3px;
+  transition: opacity 1.5s ease;
+  z-index: 1;
+  animation: twinkle 6s linear infinite;
+}
+
+#scene.night::before { opacity: 0.4; }
+
+@keyframes twinkle {
+  0%,100% { background-position: 0 0; }
+  50% { background-position: 2px 2px; }
+}
+
+/* Desk glow */
+#desk::after {
+  content: "";
+  position: absolute;
+  top: -20%;
+  left: -20%;
+  width: 140%;
+  height: 140%;
+  pointer-events: none;
+  background: radial-gradient(circle, rgba(255,255,255,0.1), transparent 70%);
+  opacity: 0;
+  transition: opacity 1s ease;
+  z-index: 0;
+  animation: glowPulse 4s ease-in-out infinite alternate;
+}
+
+#scene.night #desk::after {
+  opacity: 0.3;
+}
+
+@keyframes glowPulse {
+  0% { opacity: 0.2; }
+  50% { opacity: 0.4; }
+  100% { opacity: 0.2; }
 }
