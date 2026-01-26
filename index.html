@@ -45,7 +45,7 @@
       <div class="controls">
         <input type="file" id="upload" accept="audio/*">
       </div>
-
+<div id="candleGlow"></div>
       <p id="stats"></p>
     </div>
     <div id="statsPanel">
@@ -55,8 +55,17 @@
   <p>Focus Time: <span id="statMinutes">0</span> min</p>
   <p>Streak: <span id="statStreak">0</span> 🔥</p>
 </div>
+    <div id="xpPanel">
+  <p>Level <span id="level">1</span></p>
+  <div class="xp-bar">
+    <div id="xpFill"></div>
+  </div>
+  <p><span id="xpNow">0</span> / <span id="xpNeed">200</span> XP</p>
+</div>
+
   </div>
   <input type="file" id="musicUpload" accept="audio/*">
+  
 
 
   <!-- audio -->
@@ -66,7 +75,6 @@
   <audio id="wind" src="assets/audio/wind.mp3" loop></audio>
   <audio id="fireplace" src="assets/audio/fireplace.mp3" loop></audio>
 <audio id="fireplace" src="assets/audio/fireplace.mp3" loop></audio>
-<div id="candleGlow"></div>
 
   <audio id="bellFocus" src="assets/audio/bell-focus.mp3"></audio>
   <audio id="bellBreak" src="assets/audio/bell-break.mp3"></audio>
