@@ -1,28 +1,44 @@
-#overlay {
-  position: absolute;
-  inset: 0;
-  backdrop-filter: blur(2px);
-  background: radial-gradient(circle, transparent, rgba(0,0,0,0.4));
+/* =========================
+   Scene
+========================= */
+#scene {
+  min-height: 100vh;
+  background: linear-gradient(#eaeef3, #cfd9df);
+  transition: background 1.2s ease, filter 1.2s ease;
 }
 
-.rain {
-  position: absolute;
-  inset: 0;
-  background-image: url("../assets/images/window-rain.png");
-  background-size: cover;
-  opacity: 0.15;
-  pointer-events: none;
-}
-
-/* Night mode */
+/* =========================
+   Night Mode
+========================= */
 #scene.night {
-  background: linear-gradient(180deg, #07080d, #0b0d18);
+  background: radial-gradient(circle at top, #1b2735, #090a0f);
+  filter: brightness(0.9) saturate(1.1);
 }
 
-#scene.night #overlay {
-  background: radial-gradient(circle, transparent, rgba(0,0,0,0.6));
+/* =========================
+   Rain Visual
+========================= */
+.rain {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 1s ease;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    rgba(255,255,255,0.08),
+    rgba(255,255,255,0.08) 1px,
+    transparent 1px,
+    transparent 4px
+  );
+  animation: rain 0.6s linear infinite;
 }
 
-#scene.night .status {
-  opacity: 0.6;
+.rain.active {
+  opacity: 1;
+}
+
+@keyframes rain {
+  from { background-position: 0 0; }
+  to   { background-position: 0 100%; }
 }
