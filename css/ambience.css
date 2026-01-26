@@ -4,3 +4,13 @@
   backdrop-filter: blur(2px);
   background: radial-gradient(circle, transparent, rgba(0,0,0,0.4));
 }
+
+.rain {
+  position: absolute;
+  inset: 0;
+  background-image: url("../assets/images/window-rain.png");
+  background-size: cover;
+  opacity: 0.15;
+  pointer-events: none;
+}
+
