@@ -1,11 +1,15 @@
-
+// ==========================
+// Companion Module
+// ==========================
 import { companionMessage } from "./classes.js";
 
 const companionEl = document.getElementById("companion");
 
 export function startCompanion() {
-  companionEl.textContent = companionMessage();
-  setInterval(()=>{
+  setInterval(() => {
+    if (!companionEl) return;
     companionEl.textContent = companionMessage();
-  }, 10000); // every 10 seconds
+    // Simple CSS animation toggle
+    companionEl.classList.toggle("blink");
+  }, 10000);
 }
