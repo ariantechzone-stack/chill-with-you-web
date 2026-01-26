@@ -1,66 +1,117 @@
-// ==========================
-// Audio Module
-// ==========================
-export const lofi = document.getElementById("lofi");
-export const rain = document.getElementById("rain");
-export const fireplace = document.getElementById("fireplace");
-export const bellFocus = document.getElementById("bellFocus");
-export const bellBreak = document.getElementById("bellBreak");
+import { Storage } from './storage.js';
 
-export const lofiSlider = document.getElementById("lofiVolume");
-export const rainSlider = document.getElementById("rainVolume");
-export const fireplaceSlider = document.getElementById("fireplaceVolume");
+const lofi = document.getElementById("lofi");
+const rain = document.getElementById("rain");
+const bellFocus = document.getElementById("bellFocus");
+const bellBreak = document.getElementById("bellBreak");
 
-export let lofiPlaying = false;
-export let rainPlaying = false;
-export let fireplacePlaying = false;
-export let audioUnlocked = false;
+const focusBtn = document.getElementById("toggleFocus");
+const rainBtn = document.getElementById("toggleRain");
 
-// User-uploaded track
-export const userUploadInput = document.getElementById("uploadTrack");
-export let userTrack = null;
+const lofiSlider = document.getElementById("lofiVolume");
+const rainSlider = document.getElementById("rainVolume");
 
-// ==========================
-// Unlock audio on first interaction
-// ==========================
-export function unlockAudio() {
+let audioUnlocked = false;
+let lofiPlaying = false;
+let rainPlaying = false;
+
+// Unlock audio once on first click
+document.addEventListener("click", () => {
   if (audioUnlocked) return;
-  [lofi, rain, fireplace, bellFocus, bellBreak].forEach(a => a.muted = true);
+  [lofi, rain, bellFocus, bellBreak].forEach(a => (a.muted = true));
   lofi.play().then(() => {
     lofi.pause();
-    [lofi, rain, fireplace, bellFocus, bellBreak].forEach(a => a.muted = false);
+    [lofi, rain, bellFocus, bellBreak].forEach(a => (a.muted = false));
     audioUnlocked = true;
-    console.log("Audio unlocked!");
-  }).catch(() => {});
+  }).catch(()=>{});
+}, { once: true });
+
+// ==========================
+// Focus toggle
+// ==========================
+export function toggleLofi() {
+  if(!lofiPlaying){
+    lofi.volume = parseFloat(lofiSlider.value);
+    lofi.play();
+    focusBtn.textContent = "Stop Focus";
+    lofiPlaying = true;
+  } else {
+    lofi.pause();
+    focusBtn.textContent = "Focus Mode";
+    lofiPlaying = false;
+  }
+  saveAudioState();
 }
 
-document.addEventListener("click", unlockAudio, { once: true });
+// ==========================
+// Rain toggle
+// ==========================
+export function toggleRain() {
+  if(!rainPlaying){
+    rain.volume = parseFloat(rainSlider.value);
+    rain.play();
+    rainBtn.textContent = "Rain Off";
+    document.querySelector(".rain").classList.add("active");
+    rainPlaying = true;
+  } else {
+    rain.pause();
+    rainBtn.textContent = "Rain";
+    document.querySelector(".rain").classList.remove("active");
+    rainPlaying = false;
+  }
+  saveAudioState();
+}
 
 // ==========================
 // Sliders
 // ==========================
-lofiSlider.addEventListener("input", () => {
+lofiSlider.addEventListener("input", ()=>{
   lofi.volume = parseFloat(lofiSlider.value);
+  saveAudioState();
 });
-
-rainSlider.addEventListener("input", () => {
+rainSlider.addEventListener("input", ()=>{
   rain.volume = parseFloat(rainSlider.value);
-});
-
-fireplaceSlider.addEventListener("input", () => {
-  fireplace.volume = parseFloat(fireplaceSlider.value);
+  saveAudioState();
 });
 
 // ==========================
-// User Upload
+// Play Bell
 // ==========================
-userUploadInput?.addEventListener("change", e => {
-  const file = e.target.files[0];
-  if (file) {
-    userTrack = new Audio(URL.createObjectURL(file));
-    userTrack.loop = true;
-    userTrack.volume = 0.6;
-    userTrack.play();
-    console.log("User track playing!");
+export function playBell(isFocus){
+  if(isFocus){
+    bellBreak.currentTime=0;
+    bellBreak.volume=0.5;
+    bellBreak.play().catch(()=>{});
+  } else {
+    bellFocus.currentTime=0;
+    bellFocus.volume=0.5;
+    bellFocus.play().catch(()=>{});
   }
-});
+}
+
+// ==========================
+// Save audio state
+// ==========================
+function saveAudioState(){
+  Storage.saveState({
+    lofiPlaying,
+    rainPlaying,
+    lofiVolume: lofi.volume,
+    rainVolume: rain.volume
+  });
+}
+
+// ==========================
+// Load audio state
+// ==========================
+export function loadAudioState(){
+  const state = Storage.loadState();
+  if(!state) return;
+  lofi.volume = state.lofiVolume ?? 0.6;
+  rain.volume = state.rainVolume ?? 0.4;
+  lofiSlider.value = lofi.volume;
+  rainSlider.value = rain.volume;
+
+  if(state.lofiPlaying){ lofi.play(); lofiPlaying=true; focusBtn.textContent="Stop Focus"; }
+  if(state.rainPlaying){ rain.play(); rainPlaying=true; rainBtn.textContent="Rain Off"; document.querySelector(".rain").classList.add("active"); }
+}
