@@ -12,7 +12,9 @@ function rand(arr) {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
-export function setCompanion(state) {
+import { getFocusMessage } from "./focusAI.js";
+
+export function setCompanion(state, isNight = false) {
   sprite.className = `state-${state}`;
-  text.textContent = rand(messages[state] || messages.idle);
+  text.textContent = getFocusMessage(state, isNight);
 }
