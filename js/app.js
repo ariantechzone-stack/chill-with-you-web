@@ -281,3 +281,6 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("reset")
     .addEventListener("click", timer.pause);
 });
+import { updateStatsUI } from "./stats.js";
+
+window.addEventListener("load", updateStatsUI);
