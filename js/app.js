@@ -300,3 +300,34 @@ handleUserMusic(
   document.getElementById("lofi")
 );
 import { checkAchievements, render } from "./achievements.js";
+import {
+  getClasses,
+  getActiveClass,
+  setClass
+} from "./classes.js";
+
+function renderClasses() {
+  const container = document.getElementById("classOptions");
+  container.innerHTML = "";
+
+  const classes = getClasses();
+  const active = getActiveClass();
+
+  Object.entries(classes).forEach(([id, cls]) => {
+    const div = document.createElement("div");
+    div.className = "class-card";
+    div.textContent = `${cls.icon} ${cls.name}`;
+
+    if (active === id) div.classList.add("active");
+    if (active === id) div.classList.add("unlocked");
+
+    div.onclick = () => {
+      setClass(id);
+      renderClasses();
+    };
+
+    container.appendChild(div);
+  });
+}
+
+window.addEventListener("load", renderClasses);
