@@ -23,3 +23,24 @@
   from { background-position-y: 0; }
   to { background-position-y: 1000px; }
 }
+#companion {
+  margin-top: 16px;
+  text-align: center;
+}
+
+#companionSprite {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fff5, #0000);
+  animation: blink 6s infinite;
+}
+
+.state-focus { filter: drop-shadow(0 0 8px #6cf); }
+.state-break { filter: drop-shadow(0 0 8px #fc6); }
+.state-night { filter: drop-shadow(0 0 10px #88f); }
+
+@keyframes blink {
+  0%, 95%, 100% { opacity: 1; }
+  96%, 99% { opacity: 0.6; }
+}
