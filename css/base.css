@@ -1,12 +1,20 @@
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+// ==========================
+// App.js Main Entry
+// ==========================
+import { unlockAudio } from "./audio.js";
+import { startCompanion } from "./companion.js";
+import { renderClassOptions, applyActiveClass } from "./classes.js";
+import { switchMode, startPauseBtn } from "./timer.js";
+import { updateXPPanel } from "./xp.js";
 
-body {
-  font-family: system-ui, sans-serif;
-  background: #0e0e11;
-  color: #eee;
-  overflow: hidden;
-}
+// Unlock audio on first interaction
+unlockAudio();
+
+// Start companion messages & animations
+startCompanion();
+
+// Render class selection buttons
+renderClassOptions("classOptions");
+
+// Initial XP / Panel update
+updateXPPanel();
