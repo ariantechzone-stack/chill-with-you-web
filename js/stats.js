@@ -1,44 +1,60 @@
-const KEY = "chillStats";
+import { Storage } from './storage.js';
 
-const defaults = {
-  focusSessions: 0,
-  breakSessions: 0,
-  focusMinutes: 0,
-  streak: 0,
-  lastDate: null
-};
+const xpEl = document.getElementById("xpValue");
+const levelEl = document.getElementById("levelValue");
+const achievementsEl = document.getElementById("achievements");
 
-export function loadStats() {
-  return JSON.parse(localStorage.getItem(KEY)) || { ...defaults };
+let xp = 0;
+let level = 1;
+const achievements = [];
+
+export function addXP(amount){
+  xp += amount;
+  checkLevelUp();
+  updateUI();
+  saveStats();
 }
 
-export function saveStats(stats) {
-  localStorage.setItem(KEY, JSON.stringify(stats));
-}
-
-export function logSession(isFocus, minutes) {
-  const stats = loadStats();
-  const today = new Date().toDateString();
-
-  if (stats.lastDate !== today) {
-    stats.streak += 1;
-    stats.lastDate = today;
+function checkLevelUp(){
+  const xpForNext = level*100;
+  if(xp >= xpForNext){
+    xp -= xpForNext;
+    level++;
+    addAchievement(`Reached level ${level}`);
+    checkLevelUp();
   }
-
-  if (isFocus) {
-    stats.focusSessions++;
-    stats.focusMinutes += minutes;
-  } else {
-    stats.breakSessions++;
-  }
-
-  saveStats(stats);
-  updateStatsUI(stats);
 }
 
-export function updateStatsUI(stats = loadStats()) {
-  document.getElementById("statFocus").textContent = stats.focusSessions;
-  document.getElementById("statBreak").textContent = stats.breakSessions;
-  document.getElementById("statMinutes").textContent = stats.focusMinutes;
-  document.getElementById("statStreak").textContent = stats.streak;
+export function addAchievement(text){
+  if(!achievements.includes(text)){
+    achievements.push(text);
+    const el = document.createElement("div");
+    el.textContent = `🏆 ${text}`;
+    achievementsEl.appendChild(el);
+    saveStats();
+  }
+}
+
+function updateUI(){
+  xpEl.textContent = xp;
+  levelEl.textContent = level;
+}
+
+function saveStats(){
+  const state = Storage.loadState() || {};
+  Storage.saveState({
+    ...state,
+    xp, level, achievements
+  });
+}
+
+export function loadStats(){
+  const state = Storage.loadState();
+  if(!state) return;
+  xp = state.xp ?? 0;
+  level = state.level ?? 1;
+  if(state.achievements){
+    state.achievements.forEach(a=>addAchievement(a));
+  }
+  updateUI();
 }
