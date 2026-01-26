@@ -92,6 +92,14 @@ function switchMode() {
   isFocus = !isFocus;
   timeLeft = isFocus ? focusTime : breakTime;
   label.textContent = isFocus ? "Focus Time" : "Break Time";
+
+  // Auto day / night
+  const scene = document.getElementById("scene");
+  if (isFocus) {
+    scene.classList.remove("night"); // Day
+  } else {
+    scene.classList.add("night"); // Night
+  }
 }
 
 startPauseBtn.addEventListener("click", () => {
