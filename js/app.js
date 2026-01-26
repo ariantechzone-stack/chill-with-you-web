@@ -345,3 +345,19 @@ function onFocusComplete(isNight=false, rainOnly=false) {
   trackProgress("focus_complete", isNight, rainOnly);
   renderClassOptions("classOptions"); // refresh UI
 }
+import "./audio.js";
+import { renderClassOptions, companionMessage, applyActiveClass, getActiveClass } from "./classes.js";
+import { startCompanion } from "./companion.js";
+import { switchMode, startPauseTimer, resetTimer } from "./timer.js";
+
+// Render class options UI
+renderClassOptions("classOptions");
+
+// Start companion messages
+startCompanion();
+
+// Apply active class on load
+applyActiveClass({xpMultiplier:1, focusBonus:0, rainVolume:0.4, isNight:false});
+
+// Example: after a Pomodoro session ends, call:
+// switchMode(); -> handles class progress, ambience, rain, companion, bell
