@@ -1,30 +1,46 @@
-import { playBell } from "./audio.js";
-import { setCompanion } from "./companion.js";
+import { logSession } from "./stats.js";
+import { updateCompanion } from "./companion.js";
+import { autoWeather } from "./weather.js";
 
-let focus = 1500, breakT = 300;
-let time = focus, running = false, focusMode = true;
+let focusTime = 25 * 60;
+let breakTime = 5 * 60;
+let timeLeft = focusTime;
+let isFocus = true;
+let isRunning = false;
+let interval;
 
-const timer = document.getElementById("timer");
+export function initTimer({ onSwitch }) {
+  updateCompanion("idle");
 
-function render() {
-  timer.textContent =
-    `${String(Math.floor(time/60)).padStart(2,"0")}:${String(time%60).padStart(2,"0")}`;
-}
+  function switchMode() {
+    logSession(isFocus, isFocus ? 25 : 5);
+    isFocus = !isFocus;
+    timeLeft = isFocus ? focusTime : breakTime;
 
-document.getElementById("startPause").onclick = () => {
-  if (!running) {
-    running = true;
-    setInterval(() => {
-      time--; render();
-      if (time <= 0) {
-        focusMode = !focusMode;
-        time = focusMode ? focus : breakT;
-        playBell(focusMode ? "focus" : "break");
-        document.getElementById("scene").classList.toggle("night");
-        setCompanion(focusMode ? "focus" : "break");
+    updateCompanion(isFocus ? "focus" : "break");
+    autoWeather(!isFocus);
+
+    onSwitch?.(isFocus);
+  }
+
+  function start() {
+    if (isRunning) return;
+    isRunning = true;
+
+    interval = setInterval(() => {
+      timeLeft--;
+      if (timeLeft <= 0) {
+        clearInterval(interval);
+        isRunning = false;
+        switchMode();
       }
     }, 1000);
   }
-};
 
-render();
+  function pause() {
+    clearInterval(interval);
+    isRunning = false;
+  }
+
+  return { start, pause };
+}
