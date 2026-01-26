@@ -299,3 +299,4 @@ handleUserMusic(
   document.getElementById("musicUpload"),
   document.getElementById("lofi")
 );
+import { checkAchievements, render } from "./achievements.js";
