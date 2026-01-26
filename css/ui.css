@@ -1,17 +1,26 @@
-#pomodoro p {
-  font-size: 1.5em;
-  margin: 0.5em 0;
+#panel {
+  position: absolute;
+  left: 40px;
+  bottom: 40px;
+  max-width: 280px;
 }
 
-#sliders {
-  margin: 1em 0;
+h1 {
+  font-weight: 400;
+  opacity: 0.8;
+  margin-bottom: 12px;
 }
 
-#sliders label {
-  display: block;
-  margin: 0.5em 0;
+button {
+  background: rgba(255,255,255,0.08);
+  border: none;
+  color: #eee;
+  padding: 8px 14px;
+  border-radius: 10px;
+  margin: 4px;
+  cursor: pointer;
 }
 
-#sliders input[type="range"] {
-  width: 100%;
+button:hover {
+  background: rgba(255,255,255,0.15);
 }
