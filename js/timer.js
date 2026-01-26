@@ -1,90 +1,89 @@
-import { trackProgress } from "./classes.js";
-import { lofi, rain, lofiSlider, rainSlider } from "./audio.js";
+// ==========================
+// Timer Module
+// ==========================
+import { lofi, rain, fireplace, bellFocus, bellBreak, lofiSlider, rainSlider, fireplaceSlider } from "./audio.js";
+import { setWeather, randomWeather } from "./weather.js";
+import { addXP } from "./xp.js";
 
-// DOM Elements
 export const timerDisplay = document.getElementById("timer");
-export const label = document.getElementById("timerLabel");
-export const startPauseBtn = document.getElementById("startPause");
-export const resetBtn = document.getElementById("reset");
-export const scene = document.getElementById("scene");
+const label = document.getElementById("timerLabel");
+const startPauseBtn = document.getElementById("startPause");
+const resetBtn = document.getElementById("reset");
+const scene = document.getElementById("scene");
 
-// Timer State
-let focusTime = 25*60;
-let breakTime = 5*60;
-let timeLeft = focusTime;
-let isRunning=false;
-let isFocus=true;
-let interval=null;
+export let focusTime = 25 * 60;
+export let breakTime = 5 * 60;
+export let timeLeft = focusTime;
+export let isRunning = false;
+export let isFocus = true;
+let interval = null;
 
-export function updateTimerDisplay(){
-  const m = String(Math.floor(timeLeft/60)).padStart(2,"0");
-  const s = String(timeLeft%60).padStart(2,"0");
-  timerDisplay.textContent=`${m}:${s}`;
+function updateTimer() {
+  const m = String(Math.floor(timeLeft / 60)).padStart(2, "0");
+  const s = String(timeLeft % 60).padStart(2, "0");
+  timerDisplay.textContent = `${m}:${s}`;
 }
 
-// Play bell
-function playBell(){
-  if(isFocus){
-    bellBreak.currentTime=0; bellBreak.volume=0.5; bellBreak.play().catch(()=>{});
+function playBell() {
+  if (isFocus) {
+    bellBreak.currentTime = 0;
+    bellBreak.volume = 0.5;
+    bellBreak.play().catch(() => {});
   } else {
-    bellFocus.currentTime=0; bellFocus.volume=0.5; bellFocus.play().catch(()=>{});
+    bellFocus.currentTime = 0;
+    bellFocus.volume = 0.5;
+    bellFocus.play().catch(() => {});
   }
 }
 
-// Switch Mode (focus/break)
-export function switchMode(){
-  isFocus=!isFocus;
-  timeLeft=isFocus?focusTime:breakTime;
-  label.textContent=isFocus?"Focus Time":"Break Time";
+export function switchMode() {
+  isFocus = !isFocus;
+  timeLeft = isFocus ? focusTime : breakTime;
+  label.textContent = isFocus ? "Focus Time" : "Break Time";
 
   playBell();
+  addXP(isFocus ? 10 : 15);
 
-  const isNight = !isFocus;
-  trackProgress("focus_complete", isNight, rainPlaying);
-
-  // Auto night/day ambience
-  if(isFocus){
+  if (isFocus) {
     scene.classList.remove("night");
-    lofi.volume=parseFloat(lofiSlider.value);
-    if(rainPlaying){ rain.pause(); rainPlaying=false; document.querySelector(".rain").classList.remove("active"); }
+    lofi.volume = parseFloat(lofiSlider.value);
+    if (rain.playing) { rain.pause(); }
   } else {
     scene.classList.add("night");
-    lofi.volume=parseFloat(lofiSlider.value)*0.5;
-    if(!rainPlaying){ rain.volume=parseFloat(rainSlider.value); rain.play(); rainPlaying=true; document.querySelector(".rain").classList.add("active"); }
+    lofi.volume = parseFloat(lofiSlider.value) * 0.5;
+    if (!rain.playing) {
+      rain.volume = parseFloat(rainSlider.value);
+      rain.play();
+    }
   }
 
-  updateTimerDisplay();
+  randomWeather();
 }
 
-export function startPauseTimer(){
-  if(!isRunning){
-    isRunning=true;
-    startPauseBtn.textContent="Pause";
-    interval=setInterval(()=>{
+startPauseBtn.addEventListener("click", () => {
+  if (!isRunning) {
+    isRunning = true;
+    startPauseBtn.textContent = "Pause";
+    interval = setInterval(() => {
       timeLeft--;
-      updateTimerDisplay();
-      if(timeLeft<=0) switchMode();
-    },1000);
+      updateTimer();
+      if (timeLeft <= 0) switchMode();
+    }, 1000);
   } else {
     clearInterval(interval);
-    isRunning=false;
-    startPauseBtn.textContent="Start";
+    isRunning = false;
+    startPauseBtn.textContent = "Start";
   }
-}
+});
 
-export function resetTimer(){
+resetBtn.addEventListener("click", () => {
   clearInterval(interval);
-  isRunning=false;
-  isFocus=true;
-  timeLeft=focusTime;
-  label.textContent="Focus Time";
+  isRunning = false;
+  isFocus = true;
+  timeLeft = focusTime;
+  label.textContent = "Focus Time";
   scene.classList.remove("night");
-  lofi.volume=parseFloat(lofiSlider.value);
-  if(rainPlaying){ rain.pause(); rainPlaying=false; document.querySelector(".rain").classList.remove("active"); }
-  updateTimerDisplay();
-}
+  updateTimer();
+});
 
-// Button listeners
-startPauseBtn.addEventListener("click", startPauseTimer);
-resetBtn.addEventListener("click", resetTimer);
-updateTimerDisplay();
+updateTimer();
