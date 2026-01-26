@@ -265,3 +265,19 @@ window.addEventListener("load", loadState);
 window.addEventListener("beforeunload", saveState);
 
 updateTimer();
+import { initTimer } from "./timer.js";
+import { updateCompanion } from "./companion.js";
+
+document.addEventListener("DOMContentLoaded", () => {
+  const timer = initTimer({
+    onSwitch: isFocus => {
+      updateCompanion(isFocus ? "focus" : "break");
+    }
+  });
+
+  document.getElementById("startPause")
+    .addEventListener("click", timer.start);
+
+  document.getElementById("reset")
+    .addEventListener("click", timer.pause);
+});
