@@ -1,34 +1,20 @@
-const lofi = document.getElementById("lofi");
-const rain = document.getElementById("rain");
-
-const bellFocus = document.getElementById("bellFocus");
-const bellBreak = document.getElementById("bellBreak");
-const bellLong = document.getElementById("bellLong");
-
-let unlocked = false;
-
-document.addEventListener("click", () => {
-  if (!unlocked) {
-    [lofi, rain].forEach(a => {
-      a.muted = true;
-      a.play().then(() => a.pause());
-      a.muted = false;
-    });
-    unlocked = true;
-  }
-}, { once: true });
+export const lofi = document.getElementById("lofi");
+export const rain = document.getElementById("rain");
+export const snow = document.getElementById("snow");
+export const wind = document.getElementById("wind");
+export const fireplace = document.getElementById("fireplace");
 
 export function playBell(type) {
-  const bell = type === "focus" ? bellFocus :
-               type === "long" ? bellLong :
-               bellBreak;
-  bell.currentTime = 0;
-  bell.play();
+  document.getElementById(
+    type === "focus" ? "bellFocus" :
+    type === "long" ? "bellLong" : "bellBreak"
+  ).play();
 }
 
-export function setVolumes({ lofiV, rainV, bellV }) {
-  lofi.volume = lofiV;
-  rain.volume = rainV;
-  bellFocus.volume = bellBreak.volume = bellLong.volume = bellV;
-}
-
+document.getElementById("upload").onchange = e => {
+  const file = e.target.files[0];
+  if (file) {
+    lofi.src = URL.createObjectURL(file);
+    lofi.play();
+  }
+};
