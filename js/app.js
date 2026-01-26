@@ -1,79 +1,119 @@
 // ==========================
-// Audio Elements
+// DOM ELEMENTS
 // ==========================
+const scene = document.getElementById("scene");
+
+const focusBtn = document.getElementById("toggleFocus");
+const rainBtn = document.getElementById("toggleRain");
+
+const startPauseBtn = document.getElementById("startPause");
+const resetBtn = document.getElementById("reset");
+
+const timerDisplay = document.getElementById("timer");
+const timerLabel = document.getElementById("timerLabel");
+
+const lofiSlider = document.getElementById("lofiVolume");
+const rainSlider = document.getElementById("rainVolume");
+
+// Audio
 const lofi = document.getElementById("lofi");
 const rain = document.getElementById("rain");
 const bellFocus = document.getElementById("bellFocus");
 const bellBreak = document.getElementById("bellBreak");
 
-const focusBtn = document.getElementById("toggleFocus");
-const rainBtn = document.getElementById("toggleRain");
+// ==========================
+// STATE
+// ==========================
+let audioUnlocked = false;
 
 let lofiPlaying = false;
 let rainPlaying = false;
-let audioUnlocked = false;
+let autoRainEnabled = true;
 
-// Sliders
-const lofiSlider = document.getElementById("lofiVolume");
-const rainSlider = document.getElementById("rainVolume");
+let focusTime = 25 * 60;
+let breakTime = 5 * 60;
+
+let timeLeft = focusTime;
+let isFocus = true;
+let isRunning = false;
+let interval = null;
 
 // ==========================
-// Unlock audio once
+// AUDIO UNLOCK (SAFE)
 // ==========================
 document.addEventListener(
   "click",
-  () => {
+  async () => {
     if (audioUnlocked) return;
-    [lofi, rain, bellFocus, bellBreak].forEach(a => (a.muted = true));
-    lofi.play().then(() => {
-      lofi.pause();
-      [lofi, rain, bellFocus, bellBreak].forEach(a => (a.muted = false));
-      audioUnlocked = true;
-    }).catch(() => {});
+    audioUnlocked = true;
+
+    const audios = [lofi, rain, bellFocus, bellBreak];
+    for (const a of audios) {
+      try {
+        a.muted = true;
+        await a.play();
+        a.pause();
+        a.currentTime = 0;
+        a.muted = false;
+      } catch {}
+    }
   },
   { once: true }
 );
 
 // ==========================
-// Focus Toggle
+// UI HELPERS
+// ==========================
+function updateTimer() {
+  const m = String(Math.floor(timeLeft / 60)).padStart(2, "0");
+  const s = String(timeLeft % 60).padStart(2, "0");
+  timerDisplay.textContent = `${m}:${s}`;
+}
+
+function playBell() {
+  const bell = isFocus ? bellBreak : bellFocus;
+  bell.currentTime = 0;
+  bell.volume = 0.5;
+  bell.play().catch(() => {});
+}
+
+// ==========================
+// AUDIO CONTROLS
 // ==========================
 focusBtn.addEventListener("click", async () => {
   if (!lofiPlaying) {
     lofi.volume = parseFloat(lofiSlider.value);
     await lofi.play();
-    focusBtn.textContent = "Stop Focus";
     lofiPlaying = true;
-    saveState();
+    focusBtn.textContent = "Stop Focus";
   } else {
     lofi.pause();
-    focusBtn.textContent = "Focus Mode";
     lofiPlaying = false;
-    saveState();
+    focusBtn.textContent = "Focus Mode";
   }
+  saveState();
 });
 
-// ==========================
-// Rain Toggle
-// ==========================
 rainBtn.addEventListener("click", async () => {
   if (!rainPlaying) {
     rain.volume = parseFloat(rainSlider.value);
     await rain.play();
-    rainBtn.textContent = "Rain Off";
-    document.querySelector(".rain").classList.add("active");
     rainPlaying = true;
-    saveState();
+    autoRainEnabled = false;
+    rainBtn.textContent = "Rain Off";
+    document.querySelector(".rain")?.classList.add("active");
   } else {
     rain.pause();
-    rainBtn.textContent = "Rain";
-    document.querySelector(".rain").classList.remove("active");
     rainPlaying = false;
-    saveState();
+    autoRainEnabled = true;
+    rainBtn.textContent = "Rain";
+    document.querySelector(".rain")?.classList.remove("active");
   }
+  saveState();
 });
 
 // ==========================
-// Sliders
+// SLIDERS
 // ==========================
 lofiSlider.addEventListener("input", () => {
   lofi.volume = parseFloat(lofiSlider.value);
@@ -86,125 +126,142 @@ rainSlider.addEventListener("input", () => {
 });
 
 // ==========================
-// Pomodoro
+// POMODORO LOGIC
 // ==========================
-const timerDisplay = document.getElementById("timer");
-const label = document.getElementById("timerLabel");
-const startPauseBtn = document.getElementById("startPause");
-const resetBtn = document.getElementById("reset");
-const scene = document.getElementById("scene");
-
-let focusTime = 25*60;
-let breakTime = 5*60;
-let timeLeft = focusTime;
-let isRunning = false;
-let isFocus = true;
-let interval = null;
-
-function updateTimer() {
-  const m = String(Math.floor(timeLeft/60)).padStart(2,"0");
-  const s = String(timeLeft%60).padStart(2,"0");
-  timerDisplay.textContent = `${m}:${s}`;
-}
-
-function playBell() {
-  if (isFocus) {
-    bellBreak.currentTime = 0;
-    bellBreak.volume = 0.5;
-    bellBreak.play().catch(()=>{});
-  } else {
-    bellFocus.currentTime = 0;
-    bellFocus.volume = 0.5;
-    bellFocus.play().catch(()=>{});
-  }
-}
-
 function switchMode() {
+  playBell();
+
   isFocus = !isFocus;
   timeLeft = isFocus ? focusTime : breakTime;
-  label.textContent = isFocus ? "Focus Time" : "Break Time";
-
-  playBell();
+  timerLabel.textContent = isFocus ? "Focus Time" : "Break Time";
 
   if (isFocus) {
     scene.classList.remove("night");
-    lofi.volume = parseFloat(lofiSlider.value);
-    if (rainPlaying) { rain.pause(); document.querySelector(".rain").classList.remove("active"); rainPlaying = false;}
+
+    if (autoRainEnabled && rainPlaying) {
+      rain.pause();
+      rainPlaying = false;
+      document.querySelector(".rain")?.classList.remove("active");
+    }
   } else {
     scene.classList.add("night");
-    lofi.volume = parseFloat(lofiSlider.value)*0.5;
-    if (!rainPlaying) { rain.volume = parseFloat(rainSlider.value); rain.play(); rainPlaying = true; document.querySelector(".rain").classList.add("active"); }
+
+    if (autoRainEnabled && !rainPlaying) {
+      rain.volume = parseFloat(rainSlider.value);
+      rain.play();
+      rainPlaying = true;
+      document.querySelector(".rain")?.classList.add("active");
+    }
   }
 
+  updateTimer();
   saveState();
 }
 
-startPauseBtn.addEventListener("click", ()=>{
-  if(!isRunning){
-    isRunning=true;
-    startPauseBtn.textContent="Pause";
-    interval=setInterval(()=>{
-      timeLeft--;
-      updateTimer();
-      if(timeLeft<=0) switchMode();
-    },1000);
-  } else {
-    clearInterval(interval);
-    isRunning=false;
-    startPauseBtn.textContent="Start";
-  }
+function startTimer() {
+  if (isRunning) return;
+
+  isRunning = true;
+  startPauseBtn.textContent = "Pause";
+
+  interval = setInterval(() => {
+    timeLeft--;
+    updateTimer();
+
+    if (timeLeft <= 0) {
+      clearInterval(interval);
+      isRunning = false;
+      startPauseBtn.textContent = "Start";
+      switchMode();
+    }
+  }, 1000);
+}
+
+function pauseTimer() {
+  clearInterval(interval);
+  isRunning = false;
+  startPauseBtn.textContent = "Start";
   saveState();
+}
+
+startPauseBtn.addEventListener("click", () => {
+  isRunning ? pauseTimer() : startTimer();
 });
 
-resetBtn.addEventListener("click", ()=>{
-  clearInterval(interval);
-  isRunning=false;
-  isFocus=true;
-  timeLeft=focusTime;
-  label.textContent="Focus Time";
+resetBtn.addEventListener("click", () => {
+  pauseTimer();
+  isFocus = true;
+  timeLeft = focusTime;
+  timerLabel.textContent = "Focus Time";
   scene.classList.remove("night");
-  lofi.volume=parseFloat(lofiSlider.value);
-  if(rainPlaying){ rain.pause(); rainPlaying=false; document.querySelector(".rain").classList.remove("active"); }
+
+  if (rainPlaying && autoRainEnabled) {
+    rain.pause();
+    rainPlaying = false;
+    document.querySelector(".rain")?.classList.remove("active");
+  }
+
   updateTimer();
   saveState();
 });
 
 // ==========================
-// LocalStorage
+// STORAGE
 // ==========================
-function saveState(){
-  const state={
+function saveState() {
+  const state = {
     lofiPlaying,
     rainPlaying,
+    autoRainEnabled,
     lofiVolume: lofi.volume,
     rainVolume: rain.volume,
     isFocus,
     timeLeft,
     isRunning
   };
-  localStorage.setItem("chillState",JSON.stringify(state));
+  localStorage.setItem("chillState", JSON.stringify(state));
 }
 
-function loadState(){
-  const state=JSON.parse(localStorage.getItem("chillState"));
-  if(!state) return;
+function loadState() {
+  const state = JSON.parse(localStorage.getItem("chillState"));
+  if (!state) return;
 
-  lofi.volume=state.lofiVolume??0.6;
-  rain.volume=state.rainVolume??0.4;
-  lofiSlider.value=lofi.volume;
-  rainSlider.value=rain.volume;
+  lofi.volume = state.lofiVolume ?? 0.6;
+  rain.volume = state.rainVolume ?? 0.4;
 
-  isFocus=state.isFocus;
-  timeLeft=state.timeLeft??(isFocus?focusTime:breakTime);
+  lofiSlider.value = lofi.volume;
+  rainSlider.value = rain.volume;
+
+  lofiPlaying = state.lofiPlaying;
+  rainPlaying = state.rainPlaying;
+  autoRainEnabled = state.autoRainEnabled ?? true;
+
+  isFocus = state.isFocus;
+  timeLeft = state.timeLeft ?? (isFocus ? focusTime : breakTime);
+
+  timerLabel.textContent = isFocus ? "Focus Time" : "Break Time";
+  if (!isFocus) scene.classList.add("night");
+
+  if (lofiPlaying) {
+    lofi.play().catch(() => {});
+    focusBtn.textContent = "Stop Focus";
+  }
+
+  if (rainPlaying) {
+    rain.play().catch(() => {});
+    rainBtn.textContent = "Rain Off";
+    document.querySelector(".rain")?.classList.add("active");
+  }
+
   updateTimer();
 
-  if(state.isRunning) startPauseBtn.click();
-  if(state.lofiPlaying){ lofi.play(); lofiPlaying=true; focusBtn.textContent="Stop Focus"; }
-  if(state.rainPlaying){ rain.play(); rainPlaying=true; rainBtn.textContent="Rain Off"; document.querySelector(".rain").classList.add("active"); }
-  if(!isFocus) scene.classList.add("night");
+  if (state.isRunning) startTimer();
 }
 
-window.addEventListener("load",loadState);
-window.addEventListener("beforeunload",saveState);
+// ==========================
+// INIT
+// ==========================
+window.addEventListener("load", loadState);
+window.addEventListener("beforeunload", saveState);
 
 updateTimer();
