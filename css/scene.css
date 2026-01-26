@@ -1,1 +1,29 @@
+#scene {
+  position: fixed;
+  inset: 0;
+  background: url("../assets/images/bg-day.jpg") center/cover;
+  transition: background 2s ease, filter 2s ease;
+}
+
+#scene.night {
+  background: url("../assets/images/bg-night.jpg") center/cover;
+  filter: brightness(0.85);
+}
+
+.stars {
+  position: absolute;
+  inset: 0;
+  background: url("../assets/images/stars.png");
+  opacity: 0;
+  animation: drift 60s linear infinite;
+}
+
+#scene.night .stars {
+  opacity: 0.6;
+}
+
+@keyframes drift {
+  from { background-position: 0 0; }
+  to { background-position: 500px 300px; }
+}
 
