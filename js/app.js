@@ -41,9 +41,19 @@ focusBtn.addEventListener("click", async () => {
   }
 });
 
-// Rain toggle
+// Rain toggle (FIXED)
 rainBtn.addEventListener("click", async () => {
   try {
+    // Force-unlock rain if needed
+    if (!audioUnlocked) {
+      rain.muted = true;
+      await rain.play();
+      rain.pause();
+      rain.muted = false;
+      audioUnlocked = true;
+      console.log("Rain unlocked");
+    }
+
     if (!rainPlaying) {
       rain.volume = 0.4;
       await rain.play();
@@ -58,6 +68,7 @@ rainBtn.addEventListener("click", async () => {
     console.error("Rain error:", e);
   }
 });
+
 // Pomodoro Timer
 const timerDisplay = document.getElementById("timer");
 const label = document.getElementById("timerLabel");
