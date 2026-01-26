@@ -14,3 +14,15 @@
   pointer-events: none;
 }
 
+/* Night mode */
+#scene.night {
+  background: linear-gradient(180deg, #07080d, #0b0d18);
+}
+
+#scene.night #overlay {
+  background: radial-gradient(circle, transparent, rgba(0,0,0,0.6));
+}
+
+#scene.night .status {
+  opacity: 0.6;
+}
