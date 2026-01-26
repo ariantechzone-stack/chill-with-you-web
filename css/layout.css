@@ -1,14 +1,27 @@
-#scene {
-  position: relative;
-  min-height: 100vh;
-  overflow: hidden;
+/* ========================== */
+/* Base CSS / Reset / Variables */
+/* ========================== */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Inter', sans-serif;
 }
 
-#desk {
-  position: relative;
-  max-width: 400px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
-  z-index: 2;
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #f0f0f0;
+}
+
+:root {
+  --day-bg: #a0c4ff;
+  --night-bg: #1a1a2e;
+  --fireplace-glow: rgba(255, 180, 100, 0.2);
+  --lofi-color: #ffffff;
+  --rain-color: rgba(255,255,255,0.2);
+  --companion-color: #ffeb3b;
+  --xp-color: #ff9800;
 }
