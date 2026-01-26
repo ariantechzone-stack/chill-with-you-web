@@ -1,59 +1,38 @@
 // ==========================
 // Audio Elements
 // ==========================
-const bell = document.getElementById("bell");
 const lofi = document.getElementById("lofi");
 const rain = document.getElementById("rain");
+const bell = document.getElementById("bell");
 
 const focusBtn = document.getElementById("toggleFocus");
 const rainBtn = document.getElementById("toggleRain");
-const bell = document.getElementById("toggleBell");
 
+// ==========================
+// Audio State
+// ==========================
 let lofiPlaying = false;
 let rainPlaying = false;
 let audioUnlocked = false;
 
+// ==========================
+// Unlock audio (ONE TIME ONLY)
+// ==========================
 document.addEventListener(
   "click",
   () => {
-    if (!audioUnlocked) {
-      lofi.muted = true;
-      rain.muted = true;
-      bell.muted = true;
+    if (audioUnlocked) return;
 
-      lofi.play().then(() => {
+    [lofi, rain, bell].forEach(a => (a.muted = true));
+
+    lofi.play()
+      .then(() => {
         lofi.pause();
-        lofi.muted = false;
-        rain.muted = false;
-        bell.muted = false;
+        [lofi, rain, bell].forEach(a => (a.muted = false));
         audioUnlocked = true;
-      }).catch(() => {});
-    }
-  },
-  { once: true }
-);
-
-// ==========================
-// Unlock audio on first user interaction
-// ==========================
-document.addEventListener(
-  "click",
-  () => {
-    if (!audioUnlocked) {
-      lofi.muted = true;
-      rain.muted = true;
-
-      lofi
-        .play()
-        .then(() => {
-          lofi.pause();
-          lofi.muted = false;
-          rain.muted = false;
-          audioUnlocked = true;
-          console.log("Audio unlocked");
-        })
-        .catch(() => {});
-    }
+        console.log("🔓 Audio unlocked");
+      })
+      .catch(() => {});
   },
   { once: true }
 );
@@ -79,20 +58,10 @@ focusBtn.addEventListener("click", async () => {
 });
 
 // ==========================
-// Rain Toggle (Safe Unlock)
+// Rain Toggle
 // ==========================
 rainBtn.addEventListener("click", async () => {
   try {
-    // Force unlock rain if browser is strict
-    if (!audioUnlocked) {
-      rain.muted = true;
-      await rain.play();
-      rain.pause();
-      rain.muted = false;
-      audioUnlocked = true;
-      console.log("Rain unlocked");
-    }
-
     if (!rainPlaying) {
       rain.volume = 0.4;
       await rain.play();
@@ -136,24 +105,25 @@ function updateTimer() {
   timerDisplay.textContent = `${min}:${sec}`;
 }
 
+function playBell() {
+  try {
+    bell.currentTime = 0;
+    bell.volume = 0.5;
+    bell.play();
+  } catch {}
+}
+
 function switchMode() {
   isFocus = !isFocus;
   timeLeft = isFocus ? focusTime : breakTime;
   label.textContent = isFocus ? "Focus Time" : "Break Time";
 
-  // Play soft bell
-  try {
-    bell.currentTime = 0;
-    bell.volume = 0.5;
-    bell.play();
-  } catch (e) {}
+  playBell(); // 🔔 soft bell
 
   if (isFocus) {
-    // Day
     scene.classList.remove("night");
     lofi.volume = 0.6;
   } else {
-    // Night
     scene.classList.add("night");
     lofi.volume = 0.3;
   }
@@ -187,9 +157,9 @@ resetBtn.addEventListener("click", () => {
   isRunning = false;
   isFocus = true;
   timeLeft = focusTime;
+
   label.textContent = "Focus Time";
   startPauseBtn.textContent = "Start";
-
   scene.classList.remove("night");
   lofi.volume = 0.6;
 
