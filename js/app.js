@@ -1,17 +1,35 @@
-const audio = document.getElementById("lofi");
-const btn = document.getElementById("toggleFocus");
+const lofi = document.getElementById("lofi");
+const rain = document.getElementById("rain");
 
-let playing = false;
+const focusBtn = document.getElementById("toggleFocus");
+const rainBtn = document.getElementById("toggleRain");
 
-btn.addEventListener("click", () => {
-  playing = !playing;
+let lofiPlaying = false;
+let rainPlaying = false;
 
-  if (playing) {
-    audio.play();
-    btn.textContent = "Stop Focus";
+// Focus toggle
+focusBtn.addEventListener("click", () => {
+  lofiPlaying = !lofiPlaying;
+
+  if (lofiPlaying) {
+    lofi.play();
+    focusBtn.textContent = "Stop Focus";
   } else {
-    audio.pause();
-    btn.textContent = "Focus Mode";
+    lofi.pause();
+    focusBtn.textContent = "Focus Mode";
   }
 });
 
+// Rain toggle
+rainBtn.addEventListener("click", () => {
+  rainPlaying = !rainPlaying;
+
+  if (rainPlaying) {
+    rain.volume = 0.5;
+    rain.play();
+    rainBtn.textContent = "Rain Off";
+  } else {
+    rain.pause();
+    rainBtn.textContent = "Rain";
+  }
+});
