@@ -1,86 +1,125 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Chill With You</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+/* ========================== */
+/* Scene visuals: stars, glow, animations */
+/* ========================== */
 
-  <!-- CSS -->
-  <link rel="stylesheet" href="css/base.css">
-  <link rel="stylesheet" href="css/layout.css">
-  <link rel="stylesheet" href="css/ambience.css">
-  <link rel="stylesheet" href="css/ui.css">
-</head>
-<body>
+#scene {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  transition: background 1s ease, filter 0.5s ease;
+}
 
-  <!-- ========================== -->
-  <!-- Scene / Background -->
-  <!-- ========================== -->
-  <div id="scene" class="day weather-clear">
-    
-    <!-- Rain / Snow / Wind Layer -->
-    <div class="weather-layer"></div>
-    
-    <!-- Fireplace Glow -->
-    <div id="fireplaceGlow" class="fireplace-glow"></div>
-    
-    <!-- Companion -->
-    <div id="companion" class="companion idle"></div>
-    
-    <!-- Desk / Controls -->
-    <div id="desk">
-      <p class="status">Chilling… 🎧</p>
+/* ========================== */
+/* Stars / Night sky */
+/* ========================== */
+#scene.night::before {
+  content: '';
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: white;
+  border-radius: 50%;
+  box-shadow:
+    50px 100px white,
+    150px 200px white,
+    300px 50px white,
+    400px 150px white,
+    600px 80px white,
+    700px 220px white;
+  animation: twinkle 2s infinite alternate;
+  pointer-events: none;
+}
 
-      <!-- Focus / Lofi -->
-      <button id="toggleFocus">Focus Mode</button>
-      <input type="range" id="lofiVolume" min="0" max="1" step="0.01" value="0.6">
+@keyframes twinkle {
+  0% { opacity: 0.3; }
+  100% { opacity: 1; }
+}
 
-      <!-- Rain -->
-      <button id="toggleRain">Rain</button>
-      <input type="range" id="rainVolume" min="0" max="1" step="0.01" value="0.4">
+/* ========================== */
+/* Window glow effect */
+/* ========================== */
+.window-glow {
+  position: absolute;
+  top: 20%;
+  left: 50%;
+  width: 300px;
+  height: 400px;
+  transform: translateX(-50%);
+  background: rgba(255, 255, 180, 0.1);
+  filter: blur(40px);
+  pointer-events: none;
+  animation: glowPulse 3s ease-in-out infinite alternate;
+}
 
-      <!-- Fireplace -->
-      <button id="toggleFireplace">Fireplace</button>
-      <input type="range" id="fireplaceVolume" min="0" max="1" step="0.01" value="0.3">
+@keyframes glowPulse {
+  0% { opacity: 0.2; }
+  50% { opacity: 0.5; }
+  100% { opacity: 0.2; }
+}
 
-      <!-- Pomodoro Timer -->
-      <div id="pomodoro">
-        <p id="timerLabel">Focus Time</p>
-        <p id="timer">25:00</p>
-        <button id="startPause">Start</button>
-        <button id="reset">Reset</button>
-      </div>
+/* ========================== */
+/* Fireplace flicker / candle */
+/* ========================== */
+.fireplace-flicker {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 400px;
+  height: 200px;
+  transform: translateX(-50%);
+  background: rgba(255, 180, 100, 0.2);
+  border-radius: 50%;
+  filter: blur(50px);
+  animation: flicker 1s infinite alternate;
+  pointer-events: none;
+}
 
-      <!-- Class Selection -->
-      <div id="classOptions"></div>
+@keyframes flicker {
+  0% { opacity: 0.2; transform: translateX(-50%) scale(1); }
+  50% { opacity: 0.4; transform: translateX(-48%) scale(1.02); }
+  100% { opacity: 0.2; transform: translateX(-50%) scale(0.98); }
+}
 
-      <!-- Upload Track -->
-      <div id="uploadTrackContainer">
-        <label for="uploadTrack">Upload Your Track:</label>
-        <input type="file" id="uploadTrack" accept="audio/*">
-      </div>
+/* ========================== */
+/* Snowflakes (small subtle snow) */
+/* ========================== */
+.snowflake {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  background: white;
+  border-radius: 50%;
+  animation: fall linear infinite;
+}
 
-      <!-- XP & Achievements -->
-      <div id="xpPanel">
-        <p>Level: <span id="levelDisplay">1</span></p>
-        <p>XP: <span id="xpDisplay">0</span></p>
-        <div id="achievements"></div>
-      </div>
-    </div>
-  </div>
+@keyframes fall {
+  0% { transform: translateY(-10%); }
+  100% { transform: translateY(110%); }
+}
 
-  <!-- ========================== -->
-  <!-- Audio Elements -->
-  <!-- ========================== -->
-  <audio id="lofi" src="assets/audio/lofi-01.mp3" loop preload="auto"></audio>
-  <audio id="rain" src="assets/audio/rain.mp3" loop preload="auto"></audio>
-  <audio id="fireplace" src="assets/audio/fireplace.mp3" loop preload="auto"></audio>
-  <audio id="bellFocus" src="assets/audio/bellFocus.mp3" preload="auto"></audio>
-  <audio id="bellBreak" src="assets/audio/bellBreak.mp3" preload="auto"></audio>
+/* ========================== */
+/* Subtle background blur / ambience for night */
+/* ========================== */
+#scene.night {
+  filter: brightness(0.7) saturate(1.2);
+  transition: filter 1s ease;
+}
 
-  <!-- ========================== -->
-  <!-- JS Modules -->
-  <!-- ========================== -->
-  <script type="module" src="js/app.js"></script>
-</body>
-</html>
+/* ========================== */
+/* Extra ambient animations */
+/* ========================== */
+#scene .sparkle {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: rgba(255,255,255,0.6);
+  border-radius: 50%;
+  animation: sparkleMove 5s linear infinite;
+}
+
+@keyframes sparkleMove {
+  0% { transform: translate(0,0) rotate(0deg); opacity: 0.3; }
+  50% { opacity: 1; }
+  100% { transform: translate(100px, 200px) rotate(360deg); opacity: 0.3; }
+}
