@@ -1,3 +1,33 @@
+
+#classOptions {
+  display:flex; gap:8px; margin-top:8px;
+}
+
+.class-card {
+  padding:10px;
+  border-radius:12px;
+  background:#222;
+  cursor:pointer;
+  opacity:0.4;
+  transition: all 0.3s ease;
+}
+
+.class-card.active {
+  opacity:1;
+  box-shadow:0 0 12px #6cf;
+}
+
+.class-card.unlocked {
+  opacity:0.8;
+}
+
+#companion {
+  margin-top:12px;
+  font-style:italic;
+  color:#aaf;
+  transition:all 0.4s ease;
+}
+
 #panel {
   position: absolute;
   left: 40px;
