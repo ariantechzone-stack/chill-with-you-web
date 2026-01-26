@@ -1,27 +1,38 @@
-/* ========================== */
-/* Base CSS / Reset / Variables */
-/* ========================== */
-
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: 'Inter', sans-serif;
-}
-
-html, body {
+#scene {
+  position: relative;
   width: 100%;
-  height: 100%;
+  height: 100vh;
   overflow: hidden;
-  background: #f0f0f0;
+  transition: background 1s ease, filter 0.5s ease;
+  background: var(--background-day);
 }
 
-:root {
-  --day-bg: #a0c4ff;
-  --night-bg: #1a1a2e;
-  --fireplace-glow: rgba(255, 180, 100, 0.2);
-  --lofi-color: #ffffff;
-  --rain-color: rgba(255,255,255,0.2);
-  --companion-color: #ffeb3b;
-  --xp-color: #ff9800;
+#scene.night {
+  background: var(--background-night);
+}
+
+#desk {
+  position: absolute;
+  bottom: 10%;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+#pomodoro {
+  margin-top: 20px;
+  text-align: center;
+}
+
+#timer {
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+#timerLabel {
+  font-size: 1rem;
+  margin-bottom: 5px;
 }
