@@ -1,19 +1,25 @@
 * {
+  box-sizing: border-box;
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
-}
-
-:root {
-  --bg: #0e0f14;
-  --glow: rgba(120, 140, 255, 0.35);
-  --text: #dcdcf0;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
 body {
-  font-family: system-ui, sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  height: 100vh;
-  overflow: hidden;
+  background: #eaeef3;
+  color: #333;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  padding: 0.5em 1em;
+  margin: 0.5em 0.2em;
+  border-radius: 6px;
+  font-weight: bold;
+  transition: background 0.3s ease;
+}
+
+button:hover {
+  background: rgba(255, 255, 255, 0.2);
 }
