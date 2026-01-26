@@ -5,51 +5,52 @@
   <title>Chill With You</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- CSS -->
   <link rel="stylesheet" href="css/base.css" />
   <link rel="stylesheet" href="css/layout.css" />
   <link rel="stylesheet" href="css/ambience.css" />
   <link rel="stylesheet" href="css/ui.css" />
 </head>
+
 <body>
-
-  <div id="scene">
-    <!-- Rain visual -->
+  <div id="scene" class="day">
+    <div class="stars"></div>
+    <div class="fog"></div>
     <div class="rain"></div>
+    <div class="window-glow"></div>
 
-    <!-- Desk UI -->
     <div id="desk">
-      <p class="status">Chilling… 🎧</p>
+      <p class="status">existing quietly.</p>
 
-      <button id="toggleFocus" type="button">Focus Mode</button>
-      <button id="toggleRain" type="button">Rain</button>
-
-      <div id="sliders">
-        <label>Lo-fi Volume
-          <input type="range" id="lofiVolume" min="0" max="1" step="0.01" value="0.6">
-        </label>
-        <label>Rain Volume
-          <input type="range" id="rainVolume" min="0" max="1" step="0.01" value="0.4">
-        </label>
-      </div>
+      <button id="toggleFocus">Focus</button>
+      <button id="toggleRain">Rain</button>
 
       <div id="pomodoro">
         <p id="timerLabel">Focus Time</p>
         <p id="timer">25:00</p>
+        <button id="startPause">Start</button>
+        <button id="reset">Reset</button>
+      </div>
 
-        <button id="startPause" type="button">Start</button>
-        <button id="reset" type="button">Reset</button>
+      <div id="mixer">
+        <label>Lo-fi <input type="range" id="lofiVol" min="0" max="1" step="0.01"></label>
+        <label>Rain <input type="range" id="rainVol" min="0" max="1" step="0.01"></label>
+        <label>Bell <input type="range" id="bellVol" min="0" max="1" step="0.01"></label>
       </div>
     </div>
   </div>
 
-  <!-- Audio -->
-  <audio id="bellFocus" src="sounds/bellFocus.mp3" preload="auto"></audio>
-  <audio id="bellBreak" src="sounds/bellBreak.mp3" preload="auto"></audio>
+  <!-- AUDIO -->
   <audio id="lofi" src="assets/audio/lofi-01.mp3" loop></audio>
   <audio id="rain" src="assets/audio/rain.mp3" loop></audio>
+  <audio id="bellFocus" src="assets/audio/bell-focus.mp3"></audio>
+  <audio id="bellBreak" src="assets/audio/bell-break.mp3"></audio>
+  <audio id="bellLong" src="assets/audio/bell-long.mp3"></audio>
 
-  <!-- JS -->
+  <script src="js/storage.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/scene.js"></script>
+  <script src="js/timer.js"></script>
+  <script src="js/presets.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>
