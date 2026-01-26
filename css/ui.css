@@ -1,1 +1,15 @@
+button {
+  margin-top: 20px;
+  padding: 10px 18px;
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--glow);
+  border-radius: 20px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+button:hover {
+  box-shadow: 0 0 15px var(--glow);
+}
 
