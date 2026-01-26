@@ -24,6 +24,15 @@
       <button id="toggleFocus" type="button">Focus Mode</button>
       <button id="toggleRain" type="button">Rain</button>
 
+      <div id="sliders">
+        <label>Lo-fi Volume
+          <input type="range" id="lofiVolume" min="0" max="1" step="0.01" value="0.6">
+        </label>
+        <label>Rain Volume
+          <input type="range" id="rainVolume" min="0" max="1" step="0.01" value="0.4">
+        </label>
+      </div>
+
       <div id="pomodoro">
         <p id="timerLabel">Focus Time</p>
         <p id="timer">25:00</p>
@@ -35,7 +44,8 @@
   </div>
 
   <!-- Audio -->
-  <audio id="bell" src="sounds/bell.mp3" preload="auto"></audio>
+  <audio id="bellFocus" src="sounds/bellFocus.mp3" preload="auto"></audio>
+  <audio id="bellBreak" src="sounds/bellBreak.mp3" preload="auto"></audio>
   <audio id="lofi" src="assets/audio/lofi-01.mp3" loop></audio>
   <audio id="rain" src="assets/audio/rain.mp3" loop></audio>
 
