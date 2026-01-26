@@ -62,3 +62,21 @@
   50% { filter: brightness(1.4); }
   100% { filter: brightness(1); }
 }
+body {
+  transition: all 0.5s ease;
+}
+
+.weather-clear { background:#cceeff; }
+.weather-rain { background:#223344; }
+.weather-snow { background:#eef; }
+.weather-wind { background:#ddeeff; }
+
+.fireplace-glow {
+  box-shadow: 0 0 60px #ffb366 inset;
+  transition: box-shadow 1s ease;
+}
+
+.night-light { background:#112233; }
+.study-light { background:#fffacd; }
+.calm-light { background:#eef6f8; }
+.meditation-glow { background:#99ddcc; }
