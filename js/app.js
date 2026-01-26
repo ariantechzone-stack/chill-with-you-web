@@ -361,3 +361,31 @@ applyActiveClass({xpMultiplier:1, focusBonus:0, rainVolume:0.4, isNight:false});
 
 // Example: after a Pomodoro session ends, call:
 // switchMode(); -> handles class progress, ambience, rain, companion, bell
+import "./audio.js";
+import { renderClassOptions, companionMessage, applyActiveClass } from "./classes.js";
+import { startCompanion } from "./companion.js";
+import { switchMode, startPauseTimer, resetTimer, timerDisplay } from "./timer.js";
+import { setWeather, randomWeather } from "./weather.js";
+import { addXP } from "./xp.js";
+import { lofi, rain, fireplace } from "./audio.js";
+
+// Init UI
+renderClassOptions("classOptions");
+startCompanion();
+
+// Example: trigger XP after focus session
+function onFocusComplete(isNight=false,rainOnly=false){
+  addXP(isNight?15:10);
+  switchMode();
+  if(isNight && !rainPlaying) { rain.play(); rain.volume=0.4; }
+  if(!fireplacePlaying){ fireplace.play(); fireplace.volume=0.3; fireplacePlaying=true; }
+  randomWeather(); // Change weather after session
+}
+
+// Auto update companion messages
+setInterval(()=>{
+  document.getElementById("companion").textContent = companionMessage();
+},10000);
+
+// Example button for testing
+document.getElementById("testFocusComplete")?.addEventListener("click", ()=>onFocusComplete());
