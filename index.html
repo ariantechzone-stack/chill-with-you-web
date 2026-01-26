@@ -5,103 +5,82 @@
   <title>Chill With You</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+  <!-- CSS -->
   <link rel="stylesheet" href="css/base.css">
-  <link rel="stylesheet" href="css/scene.css">
+  <link rel="stylesheet" href="css/layout.css">
   <link rel="stylesheet" href="css/ambience.css">
   <link rel="stylesheet" href="css/ui.css">
 </head>
-
 <body>
-  <div id="scene" class="day">
 
-    <!-- ambience layers -->
-    <div class="stars"></div>
-    <div class="weather rain"></div>
-    <div class="weather snow"></div>
+  <!-- ========================== -->
+  <!-- Scene / Background -->
+  <!-- ========================== -->
+  <div id="scene" class="day weather-clear">
+    
+    <!-- Rain / Snow / Wind Layer -->
+    <div class="weather-layer"></div>
+    
+    <!-- Fireplace Glow -->
+    <div id="fireplaceGlow" class="fireplace-glow"></div>
+    
+    <!-- Companion -->
+    <div id="companion" class="companion idle"></div>
+    
+    <!-- Desk / Controls -->
+    <div id="desk">
+      <p class="status">Chilling… 🎧</p>
 
-  <div id="companion">
-  <div id="companionSprite"></div>
-  <p id="companionText">Ready when you are 🌱</p>
-</div>
+      <!-- Focus / Lofi -->
+      <button id="toggleFocus">Focus Mode</button>
+      <input type="range" id="lofiVolume" min="0" max="1" step="0.01" value="0.6">
 
-    <!-- UI -->
-    <div id="panel">
-      <h1>existing quietly.</h1>
+      <!-- Rain -->
+      <button id="toggleRain">Rain</button>
+      <input type="range" id="rainVolume" min="0" max="1" step="0.01" value="0.4">
 
-      <div id="timerBox">
-        <p id="timerLabel">Focus</p>
+      <!-- Fireplace -->
+      <button id="toggleFireplace">Fireplace</button>
+      <input type="range" id="fireplaceVolume" min="0" max="1" step="0.01" value="0.3">
+
+      <!-- Pomodoro Timer -->
+      <div id="pomodoro">
+        <p id="timerLabel">Focus Time</p>
         <p id="timer">25:00</p>
         <button id="startPause">Start</button>
         <button id="reset">Reset</button>
       </div>
 
-      <div class="controls">
-        <button data-weather="rain">Rain</button>
-        <button data-weather="snow">Snow</button>
-        <button data-weather="wind">Wind</button>
-        <button id="fireplaceToggle">Fireplace</button>
+      <!-- Class Selection -->
+      <div id="classOptions"></div>
+
+      <!-- Upload Track -->
+      <div id="uploadTrackContainer">
+        <label for="uploadTrack">Upload Your Track:</label>
+        <input type="file" id="uploadTrack" accept="audio/*">
       </div>
 
-      <div class="controls">
-        <input type="file" id="upload" accept="audio/*">
+      <!-- XP & Achievements -->
+      <div id="xpPanel">
+        <p>Level: <span id="levelDisplay">1</span></p>
+        <p>XP: <span id="xpDisplay">0</span></p>
+        <div id="achievements"></div>
       </div>
-<div id="candleGlow"></div>
-      <p id="stats"></p>
     </div>
-    <div id="statsPanel">
-  <h3>📊 Today</h3>
-  <p>Focus Sessions: <span id="statFocus">0</span></p>
-  <p>Breaks: <span id="statBreak">0</span></p>
-  <p>Focus Time: <span id="statMinutes">0</span> min</p>
-  <p>Streak: <span id="statStreak">0</span> 🔥</p>
-</div>
-    <div id="xpPanel">
-  <p>Level <span id="level">1</span></p>
-  <div class="xp-bar">
-    <div id="xpFill"></div>
   </div>
-  <p><span id="xpNow">0</span> / <span id="xpNeed">200</span> XP</p>
-</div>
-<div id="achievements">
-  <h3>🏆 Achievements</h3>
-  <div id="badgeGrid"></div>
-  <div id="classPanel">
-  <h3>🎮 Focus Class</h3>
-  <div id="classOptions"></div>
-</div>
-  <div id="classPanel">
-  <h3>🎮 Focus Class</h3>
-  <div id="classOptions"></div>
-</div>
 
-<div id="companion">
-  🧍 Your companion will talk here...
-</div>
+  <!-- ========================== -->
+  <!-- Audio Elements -->
+  <!-- ========================== -->
+  <audio id="lofi" src="assets/audio/lofi-01.mp3" loop preload="auto"></audio>
+  <audio id="rain" src="assets/audio/rain.mp3" loop preload="auto"></audio>
+  <audio id="fireplace" src="assets/audio/fireplace.mp3" loop preload="auto"></audio>
+  <audio id="bellFocus" src="assets/audio/bellFocus.mp3" preload="auto"></audio>
+  <audio id="bellBreak" src="assets/audio/bellBreak.mp3" preload="auto"></audio>
 
-</div>
-
-  </div>
-  <input type="file" id="musicUpload" accept="audio/*">
-  
-
-
-  <!-- audio -->
-  <audio id="lofi" loop></audio>
-  <audio id="rain" src="assets/audio/rain.mp3" loop></audio>
-  <audio id="snow" src="assets/audio/snow.mp3" loop></audio>
-  <audio id="wind" src="assets/audio/wind.mp3" loop></audio>
-  <audio id="fireplace" src="assets/audio/fireplace.mp3" loop></audio>
-<audio id="fireplace" src="assets/audio/fireplace.mp3" loop></audio>
-
-  <audio id="bellFocus" src="assets/audio/bell-focus.mp3"></audio>
-  <audio id="bellBreak" src="assets/audio/bell-break.mp3"></audio>
-  <audio id="bellLong" src="assets/audio/bell-long.mp3"></audio>
-
-  <script src="js/storage.js"></script>
-  <script src="js/audio.js"></script>
-  <script src="js/weather.js"></script>
-  <script src="js/companion.js"></script>
-  <script src="js/timer.js"></script>
-  <script src="js/app.js"></script>
+  <!-- ========================== -->
+  <!-- JS Modules -->
+  <!-- ========================== -->
+  <script type="module" src="js/app.js"></script>
 </body>
 </html>
