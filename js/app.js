@@ -331,3 +331,17 @@ function renderClasses() {
 }
 
 window.addEventListener("load", renderClasses);
+import { renderClassOptions, companionMessage, trackProgress, applyActiveClass } from "./classes.js";
+
+window.addEventListener("load", ()=>{
+  renderClassOptions("classOptions");
+  setInterval(()=>{
+    document.getElementById("companion").textContent = companionMessage();
+  }, 10000); // companion speaks every 10s
+});
+
+// Example: call this after a focus session finishes
+function onFocusComplete(isNight=false, rainOnly=false) {
+  trackProgress("focus_complete", isNight, rainOnly);
+  renderClassOptions("classOptions"); // refresh UI
+}
