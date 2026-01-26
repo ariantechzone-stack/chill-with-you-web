@@ -1,15 +1,37 @@
 // ==========================
 // Audio Elements
 // ==========================
+const bell = document.getElementById("bell");
 const lofi = document.getElementById("lofi");
 const rain = document.getElementById("rain");
 
 const focusBtn = document.getElementById("toggleFocus");
 const rainBtn = document.getElementById("toggleRain");
+const bell = document.getElementById("toggleBell");
 
 let lofiPlaying = false;
 let rainPlaying = false;
 let audioUnlocked = false;
+
+document.addEventListener(
+  "click",
+  () => {
+    if (!audioUnlocked) {
+      lofi.muted = true;
+      rain.muted = true;
+      bell.muted = true;
+
+      lofi.play().then(() => {
+        lofi.pause();
+        lofi.muted = false;
+        rain.muted = false;
+        bell.muted = false;
+        audioUnlocked = true;
+      }).catch(() => {});
+    }
+  },
+  { once: true }
+);
 
 // ==========================
 // Unlock audio on first user interaction
@@ -119,12 +141,19 @@ function switchMode() {
   timeLeft = isFocus ? focusTime : breakTime;
   label.textContent = isFocus ? "Focus Time" : "Break Time";
 
+  // Play soft bell
+  try {
+    bell.currentTime = 0;
+    bell.volume = 0.5;
+    bell.play();
+  } catch (e) {}
+
   if (isFocus) {
-    // Day mode
+    // Day
     scene.classList.remove("night");
     lofi.volume = 0.6;
   } else {
-    // Night mode
+    // Night
     scene.classList.add("night");
     lofi.volume = 0.3;
   }
