@@ -129,6 +129,15 @@ rainSlider.addEventListener("input", () => {
 // POMODORO LOGIC
 // ==========================
 function switchMode() {
+  import { addXP, loadXP } from "./gamification.js";
+
+// when switching
+if (!isFocus) {
+  addXP(50); // focus complete
+} else {
+  addXP(10); // break complete
+}
+
   playBell();
 
   isFocus = !isFocus;
