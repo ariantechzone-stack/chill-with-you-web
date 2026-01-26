@@ -8,15 +8,12 @@ const bell = document.getElementById("bell");
 const focusBtn = document.getElementById("toggleFocus");
 const rainBtn = document.getElementById("toggleRain");
 
-// ==========================
-// Audio State
-// ==========================
 let lofiPlaying = false;
 let rainPlaying = false;
 let audioUnlocked = false;
 
 // ==========================
-// Unlock audio (ONE TIME ONLY)
+// Unlock Audio (once)
 // ==========================
 document.addEventListener(
   "click",
@@ -25,55 +22,47 @@ document.addEventListener(
 
     [lofi, rain, bell].forEach(a => (a.muted = true));
 
-    lofi.play()
-      .then(() => {
-        lofi.pause();
-        [lofi, rain, bell].forEach(a => (a.muted = false));
-        audioUnlocked = true;
-        console.log("🔓 Audio unlocked");
-      })
-      .catch(() => {});
+    lofi.play().then(() => {
+      lofi.pause();
+      [lofi, rain, bell].forEach(a => (a.muted = false));
+      audioUnlocked = true;
+      console.log("🔓 Audio unlocked");
+    }).catch(() => {});
   },
   { once: true }
 );
 
 // ==========================
-// Focus (Lo-fi) Toggle
+// Focus (Lo-fi)
 // ==========================
 focusBtn.addEventListener("click", async () => {
-  try {
-    if (!lofiPlaying) {
-      lofi.volume = 0.6;
-      await lofi.play();
-      focusBtn.textContent = "Stop Focus";
-      lofiPlaying = true;
-    } else {
-      lofi.pause();
-      focusBtn.textContent = "Focus Mode";
-      lofiPlaying = false;
-    }
-  } catch (e) {
-    console.error("Lofi error:", e);
+  if (!lofiPlaying) {
+    lofi.volume = 0.6;
+    await lofi.play();
+    focusBtn.textContent = "Stop Focus";
+    lofiPlaying = true;
+  } else {
+    lofi.pause();
+    focusBtn.textContent = "Focus Mode";
+    lofiPlaying = false;
   }
 });
 
 // ==========================
-// Rain Toggle
+// Rain
 // ==========================
 rainBtn.addEventListener("click", async () => {
-  try {
-    if (!rainPlaying) {
-      rain.volume = 0.4;
-      await rain.play();
-      rainBtn.textContent = "Rain Off";
-      rainPlaying = true;
-    } else {
-      rain.pause();
-      rainBtn.textContent = "Rain";
-      rainPlaying = false;
-    }
-  } catch (e) {
-    console.error("Rain error:", e);
+  if (!rainPlaying) {
+    rain.volume = 0.4;
+    await rain.play();
+    rainBtn.textContent = "Rain Off";
+    document.querySelector(".rain").classList.add("active");
+    rainPlaying = true;
+  } else {
+    rain.pause();
+    rainBtn.textContent = "Rain";
+    document.querySelector(".rain").classList.remove("active");
+    rainPlaying = false;
   }
 });
 
@@ -97,20 +86,18 @@ let isFocus = true;
 let interval = null;
 
 // ==========================
-// Timer Helpers
+// Helpers
 // ==========================
 function updateTimer() {
-  const min = String(Math.floor(timeLeft / 60)).padStart(2, "0");
-  const sec = String(timeLeft % 60).padStart(2, "0");
-  timerDisplay.textContent = `${min}:${sec}`;
+  const m = String(Math.floor(timeLeft / 60)).padStart(2, "0");
+  const s = String(timeLeft % 60).padStart(2, "0");
+  timerDisplay.textContent = `${m}:${s}`;
 }
 
 function playBell() {
-  try {
-    bell.currentTime = 0;
-    bell.volume = 0.5;
-    bell.play();
-  } catch {}
+  bell.currentTime = 0;
+  bell.volume = 0.5;
+  bell.play().catch(() => {});
 }
 
 function switchMode() {
@@ -118,7 +105,7 @@ function switchMode() {
   timeLeft = isFocus ? focusTime : breakTime;
   label.textContent = isFocus ? "Focus Time" : "Break Time";
 
-  playBell(); // 🔔 soft bell
+  playBell();
 
   if (isFocus) {
     scene.classList.remove("night");
@@ -130,7 +117,7 @@ function switchMode() {
 }
 
 // ==========================
-// Pomodoro Controls
+// Controls
 // ==========================
 startPauseBtn.addEventListener("click", () => {
   if (!isRunning) {
@@ -140,10 +127,7 @@ startPauseBtn.addEventListener("click", () => {
     interval = setInterval(() => {
       timeLeft--;
       updateTimer();
-
-      if (timeLeft <= 0) {
-        switchMode();
-      }
+      if (timeLeft <= 0) switchMode();
     }, 1000);
   } else {
     clearInterval(interval);
@@ -157,16 +141,9 @@ resetBtn.addEventListener("click", () => {
   isRunning = false;
   isFocus = true;
   timeLeft = focusTime;
-
   label.textContent = "Focus Time";
-  startPauseBtn.textContent = "Start";
   scene.classList.remove("night");
-  lofi.volume = 0.6;
-
   updateTimer();
 });
 
-// ==========================
-// Init
-// ==========================
 updateTimer();
