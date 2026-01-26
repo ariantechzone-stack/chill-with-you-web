@@ -1,17 +1,18 @@
-import { rain, snow, wind } from "./audio.js";
+const weatherLayer = document.getElementById("weather");
 
-const layers = {
-  rain: document.querySelector(".weather.rain"),
-  snow: document.querySelector(".weather.snow")
-};
+let currentWeather = "clear";
 
-document.querySelectorAll("[data-weather]").forEach(btn => {
-  btn.onclick = () => {
-    Object.values(layers).forEach(l => l.style.opacity = 0);
-    rain.pause(); snow.pause(); wind.pause();
+export function setWeather(type) {
+  currentWeather = type;
+  weatherLayer.className = `weather ${type}`;
+}
 
-    const type = btn.dataset.weather;
-    layers[type].style.opacity = 1;
-    document.getElementById(type).play();
-  };
-});
+export function autoWeather(isNight) {
+  if (isNight) setWeather("rain");
+  else setWeather("clear");
+}
+
+export function getWeather() {
+  return currentWeather;
+}
+;
