@@ -1,6 +1,6 @@
-const STATS_KEY = "chillStats";
+const KEY = "chillStats";
 
-const defaultStats = {
+const defaults = {
   focusSessions: 0,
   breakSessions: 0,
   focusMinutes: 0,
@@ -9,14 +9,14 @@ const defaultStats = {
 };
 
 export function loadStats() {
-  return JSON.parse(localStorage.getItem(STATS_KEY)) || defaultStats;
+  return JSON.parse(localStorage.getItem(KEY)) || { ...defaults };
 }
 
 export function saveStats(stats) {
-  localStorage.setItem(STATS_KEY, JSON.stringify(stats));
+  localStorage.setItem(KEY, JSON.stringify(stats));
 }
 
-export function logSession(isFocus, durationMinutes) {
+export function logSession(isFocus, minutes) {
   const stats = loadStats();
   const today = new Date().toDateString();
 
@@ -27,10 +27,18 @@ export function logSession(isFocus, durationMinutes) {
 
   if (isFocus) {
     stats.focusSessions++;
-    stats.focusMinutes += durationMinutes;
+    stats.focusMinutes += minutes;
   } else {
     stats.breakSessions++;
   }
 
   saveStats(stats);
+  updateStatsUI(stats);
+}
+
+export function updateStatsUI(stats = loadStats()) {
+  document.getElementById("statFocus").textContent = stats.focusSessions;
+  document.getElementById("statBreak").textContent = stats.breakSessions;
+  document.getElementById("statMinutes").textContent = stats.focusMinutes;
+  document.getElementById("statStreak").textContent = stats.streak;
 }
