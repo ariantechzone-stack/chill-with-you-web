@@ -284,3 +284,9 @@ document.addEventListener("DOMContentLoaded", () => {
 import { updateStatsUI } from "./stats.js";
 
 window.addEventListener("load", updateStatsUI);
+import { handleUserMusic } from "./audio.js";
+
+handleUserMusic(
+  document.getElementById("musicUpload"),
+  document.getElementById("lofi")
+);
