@@ -58,3 +58,59 @@ rainBtn.addEventListener("click", async () => {
     console.error("Rain error:", e);
   }
 });
+// Pomodoro Timer
+const timerDisplay = document.getElementById("timer");
+const label = document.getElementById("timerLabel");
+const startPauseBtn = document.getElementById("startPause");
+const resetBtn = document.getElementById("reset");
+
+let focusTime = 25 * 60;
+let breakTime = 5 * 60;
+let timeLeft = focusTime;
+let isRunning = false;
+let isFocus = true;
+let interval = null;
+
+function updateTimer() {
+  const min = String(Math.floor(timeLeft / 60)).padStart(2, "0");
+  const sec = String(timeLeft % 60).padStart(2, "0");
+  timerDisplay.textContent = `${min}:${sec}`;
+}
+
+function switchMode() {
+  isFocus = !isFocus;
+  timeLeft = isFocus ? focusTime : breakTime;
+  label.textContent = isFocus ? "Focus Time" : "Break Time";
+}
+
+startPauseBtn.addEventListener("click", () => {
+  if (!isRunning) {
+    isRunning = true;
+    startPauseBtn.textContent = "Pause";
+
+    interval = setInterval(() => {
+      timeLeft--;
+      updateTimer();
+
+      if (timeLeft <= 0) {
+        switchMode();
+      }
+    }, 1000);
+  } else {
+    clearInterval(interval);
+    isRunning = false;
+    startPauseBtn.textContent = "Start";
+  }
+});
+
+resetBtn.addEventListener("click", () => {
+  clearInterval(interval);
+  isRunning = false;
+  isFocus = true;
+  timeLeft = focusTime;
+  label.textContent = "Focus Time";
+  startPauseBtn.textContent = "Start";
+  updateTimer();
+});
+
+updateTimer();
