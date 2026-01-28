@@ -255,10 +255,12 @@ function addAchievement(a){
   }
 }
 
-function updateXP(){
-  xpEl.textContent = xp;
-  levelEl.textContent = level;
-  achEl.innerHTML = achievements.map(a=>`🏆 ${a}`).join("<br>");
+function updateXP(xp, level) {
+  const xpEl = document.getElementById("xpValue");
+  const levelEl = document.getElementById("levelValue");
+
+  if (xpEl) xpEl.textContent = xp;
+  if (levelEl) levelEl.textContent = level;
 }
 
 function saveXP(){
