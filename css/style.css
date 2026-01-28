@@ -255,3 +255,35 @@ input[type="range"] {
 #pomodoro button {
   margin: 5px;
 }
+
+/* General text inside scene */
+#scene, #desk, #companion, #pomodoro, #xpPanel {
+  color: #ffffff; /* white for better contrast on night backgrounds */
+  text-shadow: 0 0 5px rgba(0,0,0,0.7); /* soft outline for readability */
+}
+
+/* Buttons */
+button {
+  background: rgba(255, 209, 102, 0.9); /* slightly transparent gold */
+  color: #111; /* dark text for buttons */
+  text-shadow: none;
+}
+
+/* Status / companion text */
+.status, #companion {
+  font-weight: bold;
+  text-align: center;
+  text-shadow: 0 0 5px rgba(0,0,0,0.6);
+}
+
+/* Timer */
+#timer, #timerLabel {
+  color: #fff;
+  text-shadow: 0 0 6px rgba(0,0,0,0.7);
+}
+
+/* XP panel */
+#xpPanel {
+  color: #fff;
+  text-shadow: 0 0 5px rgba(0,0,0,0.6);
+}
