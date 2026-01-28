@@ -4,31 +4,39 @@ import { loadSceneState } from './scene.js';
 import { loadCompanionState } from './companion.js';
 import { loadStats, addXP } from './stats.js';
 
-// Event listeners
-document.getElementById("toggleFocus").addEventListener("click", toggleLofi);
-document.getElementById("toggleRain").addEventListener("click", toggleRain);
-document.getElementById("startPause").addEventListener("click", startPauseTimer);
-document.getElementById("reset").addEventListener("click", resetTimer);
+/* ---------- Event Listeners ---------- */
+document.getElementById("toggleFocus")?.addEventListener("click", toggleLofi);
+document.getElementById("toggleRain")?.addEventListener("click", toggleRain);
+document.getElementById("startPause")?.addEventListener("click", startPauseTimer);
+document.getElementById("reset")?.addEventListener("click", resetTimer);
 
-// User uploaded track
+/* ---------- User Uploaded Track ---------- */
 const userTrackInput = document.getElementById("userTrack");
-userTrackInput.addEventListener("change", e=>{
+userTrackInput?.addEventListener("change", e => {
   const file = e.target.files[0];
-  if(file){
+  if (file) {
     const url = URL.createObjectURL(file);
     const lofi = document.getElementById("lofi");
-    lofi.src = url;
-    lofi.loop = true;
-    lofi.play();
+    if (lofi) {
+      lofi.src = url;
+      lofi.loop = true;
+      lofi.play().catch(() => {
+        console.log("Audio play blocked until user interaction");
+      });
+    }
   }
 });
 
-// Load all states on page load
-window.addEventListener("load", ()=>{
+/* ---------- Load States ---------- */
+window.addEventListener("load", () => {
   loadAudioState();
   loadTimerState();
   loadSceneState();
   loadCompanionState();
   loadStats();
-  addXP(5); // bonus XP on page load
+
+  if (!localStorage.getItem("firstLoad")) {
+    addXP(5);
+    localStorage.setItem("firstLoad", "true");
+  }
 });
