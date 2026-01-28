@@ -18,6 +18,8 @@ const timerLabel = document.getElementById("timerLabel");
 const startPauseBtn = document.getElementById("startPause");
 const resetBtn = document.getElementById("reset");
 
+const companionEl = document.getElementById("companion");
+
 let lofiPlaying = false;
 let rainPlaying = false;
 let fireplacePlaying = false;
@@ -31,9 +33,25 @@ let isFocus = true;
 let isRunning = false;
 let interval = null;
 
-// Night mode thresholds
+// Night mode
 const NIGHT_HOUR = 20; // 8 PM
 let nightModeActive = false;
+
+// XP / Achievements
+const XP_KEY = "chillXP";
+let xpState = JSON.parse(localStorage.getItem(XP_KEY)) || {
+  xp: 0,
+  level: 1,
+  achievements: []
+};
+
+// Companion
+let companionClass = "monk";
+const companionMessages = {
+  monk: ["Focus on your breath...", "Patience is key."],
+  scholar: ["Time to learn!", "Absorb knowledge slowly."],
+  nightOwl: ["The night is productive.", "Keep coding!"]
+};
 
 // ==========================
 // UTILITY FUNCTIONS
@@ -42,15 +60,11 @@ function unlockAudio() {
   if (audioUnlocked) return;
   [lofi, rain, fireplace, bellFocus, bellBreak].forEach(a => {
     a.muted = true;
-    a.play().then(() => {
-      a.pause();
-      a.muted = false;
-    }).catch(()=>{});
+    a.play().then(() => { a.pause(); a.muted = false; }).catch(()=>{});
   });
   audioUnlocked = true;
 }
 
-// Smooth volume fade
 function fade(audio, from, to, duration = 600) {
   const steps = 30;
   const stepTime = duration / steps;
@@ -58,7 +72,6 @@ function fade(audio, from, to, duration = 600) {
   let current = from;
 
   audio.volume = from;
-
   const interval = setInterval(() => {
     current += delta;
     audio.volume = Math.max(0, Math.min(1, current));
@@ -69,7 +82,6 @@ function fade(audio, from, to, duration = 600) {
   }, stepTime);
 }
 
-// Play bell
 function playBell(isFocus) {
   const bell = isFocus ? bellFocus : bellBreak;
   bell.currentTime = 0;
@@ -77,14 +89,12 @@ function playBell(isFocus) {
   bell.play().catch(()=>{});
 }
 
-// Update timer display
-function updateTimerDisplay(){
+function updateTimerDisplay() {
   const m = String(Math.floor(timeLeft/60)).padStart(2,"0");
   const s = String(timeLeft%60).padStart(2,"0");
   timerDisplay.textContent = `${m}:${s}`;
 }
 
-// Check if current hour is night
 function checkNightMode() {
   const h = new Date().getHours();
   return h >= NIGHT_HOUR;
@@ -127,7 +137,6 @@ rainBtn.addEventListener("click", () => {
   }
 });
 
-// Volume sliders
 lofiSlider.addEventListener("input", () => {
   if (lofiPlaying) lofi.volume = parseFloat(lofiSlider.value);
 });
@@ -142,111 +151,116 @@ rainSlider.addEventListener("input", () => {
 function updateNightAudio() {
   nightModeActive = checkNightMode();
   if (nightModeActive) {
-    // auto fade in rain if not already playing
-    if (!rainPlaying) {
-      rain.currentTime = 0;
-      rain.play();
-      fade(rain, 0, parseFloat(rainSlider.value));
-      rainPlaying = true;
-    }
-    // optional: fireplace
-    if (!fireplacePlaying) {
-      fireplace.currentTime = 0;
-      fireplace.play();
-      fade(fireplace, 0, 0.3);
-      fireplacePlaying = true;
-    }
-    // duck lofi if playing
+    if (!rainPlaying) { rain.currentTime = 0; rain.play(); fade(rain, 0, parseFloat(rainSlider.value)); rainPlaying=true; }
+    if (!fireplacePlaying) { fireplace.currentTime=0; fireplace.play(); fade(fireplace,0,0.3); fireplacePlaying=true; }
     if (lofiPlaying) fade(lofi, lofi.volume, 0.2);
   } else {
-    // fade out rain and fireplace if night over
-    if (rainPlaying && !document.getElementById("toggleRain").classList.contains("active")) {
-      fade(rain, rain.volume, 0);
-      setTimeout(()=> rain.pause(), 600);
-      rainPlaying = false;
-    }
-    if (fireplacePlaying) {
-      fade(fireplace, fireplace.volume, 0);
-      setTimeout(()=> fireplace.pause(), 600);
-      fireplacePlaying = false;
-    }
-    if (lofiPlaying) fade(lofi, lofi.volume, parseFloat(lofiSlider.value));
+    if (rainPlaying && !rainBtn.classList.contains("active")) { fade(rain,rain.volume,0); setTimeout(()=>rain.pause(),600); rainPlaying=false; }
+    if (fireplacePlaying) { fade(fireplace,fireplace.volume,0); setTimeout(()=>fireplace.pause(),600); fireplacePlaying=false; }
+    if (lofiPlaying) fade(lofi,lofi.volume,parseFloat(lofiSlider.value));
   }
 }
 
 // ==========================
 // POMODORO TIMER
 // ==========================
-function switchPomodoroMode(){
+function switchPomodoroMode() {
   isFocus = !isFocus;
   timeLeft = isFocus ? focusTime : breakTime;
   timerLabel.textContent = isFocus ? "Focus Time" : "Break Time";
 
   playBell(isFocus);
 
-  // Auto pause lofi on break
-  if (!isFocus && lofiPlaying) {
-    fade(lofi, lofi.volume, 0);
-    setTimeout(() => lofi.pause(), 600);
-  } else if (isFocus && lofiPlaying) {
-    lofi.play();
-    fade(lofi, 0, parseFloat(lofiSlider.value));
-  }
+  // Auto pause Lofi on break
+  if (!isFocus && lofiPlaying) { fade(lofi,lofi.volume,0); setTimeout(()=>lofi.pause(),600); }
+  else if (isFocus && lofiPlaying) { lofi.play(); fade(lofi,0,parseFloat(lofiSlider.value)); }
 
   updateNightAudio();
   saveTimerState();
 }
 
-function saveTimerState(){
-  localStorage.setItem("pomodoroState", JSON.stringify({
-    isFocus,
-    timeLeft,
-    isRunning
-  }));
+function startPauseTimer() {
+  if (!isRunning) {
+    isRunning = true;
+    startPauseBtn.textContent = "Pause";
+    interval = setInterval(() => {
+      timeLeft--;
+      updateTimerDisplay();
+      if (timeLeft <= 0) switchPomodoroMode();
+    }, 1000);
+  } else {
+    clearInterval(interval);
+    isRunning = false;
+    startPauseBtn.textContent = "Start";
+  }
+  saveTimerState();
 }
 
-function loadTimerState(){
+function resetTimer() {
+  clearInterval(interval);
+  isRunning = false;
+  isFocus = true;
+  timeLeft = focusTime;
+  timerLabel.textContent = "Focus Time";
+  updateTimerDisplay();
+  saveTimerState();
+
+  if (lofiPlaying) { lofi.play(); fade(lofi,0,parseFloat(lofiSlider.value)); }
+  updateNightAudio();
+}
+
+function saveTimerState() {
+  localStorage.setItem("pomodoroState", JSON.stringify({ isFocus,timeLeft,isRunning }));
+}
+
+function loadTimerState() {
   const state = JSON.parse(localStorage.getItem("pomodoroState"));
-  if(!state) return;
+  if (!state) return;
   isFocus = state.isFocus ?? true;
   timeLeft = state.timeLeft ?? (isFocus?focusTime:breakTime);
   updateTimerDisplay();
-
-  if(state.isRunning) startPauseTimer();
+  if (state.isRunning) startPauseTimer();
 }
 
-function startPauseTimer(){
-  if(!isRunning){
-    isRunning=true;
-    startPauseBtn.textContent="Pause";
-    interval = setInterval(()=>{
-      timeLeft--;
-      updateTimerDisplay();
-      if(timeLeft <= 0) switchPomodoroMode();
-    },1000);
-  } else {
-    clearInterval(interval);
-    isRunning=false;
-    startPauseBtn.textContent="Start";
+// ==========================
+// XP & ACHIEVEMENTS
+// ==========================
+function addXP(amount) {
+  xpState.xp += amount;
+  const needed = xpState.level * 200;
+  if (xpState.xp >= needed) {
+    xpState.xp -= needed;
+    xpState.level++;
+    addAchievement(`Reached level ${xpState.level}`);
   }
-  saveTimerState();
+  saveXP();
+  updateXPUI();
 }
 
-function resetTimer(){
-  clearInterval(interval);
-  isRunning=false;
-  isFocus=true;
-  timeLeft=focusTime;
-  timerLabel.textContent="Focus Time";
-  updateTimerDisplay();
-  saveTimerState();
-
-  // restore Lofi if it was playing
-  if (lofiPlaying) {
-    lofi.play();
-    fade(lofi, 0, parseFloat(lofiSlider.value));
+function addAchievement(name) {
+  if (!xpState.achievements.includes(name)) {
+    xpState.achievements.push(name);
+    updateXPUI();
   }
-  updateNightAudio();
+}
+
+function saveXP() { localStorage.setItem(XP_KEY, JSON.stringify(xpState)); }
+
+function updateXPUI() {
+  const levelEl = document.getElementById("levelValue");
+  const xpEl = document.getElementById("xpValue");
+  const fillEl = document.getElementById("xpFill");
+  if (levelEl) levelEl.textContent = xpState.level;
+  if (xpEl) xpEl.textContent = xpState.xp;
+  if (fillEl) fillEl.style.width = `${(xpState.xp / (xpState.level*200))*100}%`;
+}
+
+// ==========================
+// COMPANION MESSAGES
+// ==========================
+function showCompanionMessage() {
+  const arr = companionMessages[companionClass] || ["Stay focused!"];
+  companionEl.textContent = arr[Math.floor(Math.random()*arr.length)];
 }
 
 // ==========================
@@ -257,5 +271,7 @@ window.addEventListener("load", () => {
   loadTimerState();
   updateTimerDisplay();
   updateNightAudio();
+  updateXPUI();
+  showCompanionMessage();
   setInterval(updateNightAudio, 60*1000); // check every 1 min
 });
