@@ -1,3 +1,8 @@
+document.addEventListener("click", () => {
+  document.querySelectorAll("audio").forEach(a => {
+    a.play().then(() => a.pause()).catch(() => {});
+  });
+}, { once: true });
 /* =====================================
    Chill With You – Single File app.js
    ===================================== */
