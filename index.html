@@ -1,85 +1,65 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Chill With You</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- Favicon -->
+  <!-- Prevent favicon error -->
   <link rel="icon" href="data:,">
-
-  <!-- Fonts -->
-  <link rel="stylesheet" href="assets/fonts/inter.woff2">
 
   <!-- CSS -->
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <!-- Scene / Background -->
-  <div id="scene">
-    <!-- Weather Layers -->
-    <div id="weatherRain" class="weather-layer"></div>
-    <div id="weatherSnow" class="weather-layer"></div>
-    <div id="weatherWind" class="weather-layer"></div>
 
-    <!-- Fireplace / Candle Glow -->
-    <div class="fireplace-flicker"></div>
+  <div id="scene" class="day">
 
-    <!-- Window Glow -->
-    <div class="window-glow"></div>
-
-    <!-- Rain Visual -->
+    <!-- Window rain animation -->
     <div class="rain"></div>
 
-    <!-- Desk / Controls -->
-<div id="desk" class="glass">
-  <h2 class="status">Chilling… 🎧</h2>
+    <!-- Cozy lights -->
+    <div class="lamp-glow"></div>
+    <div class="window-glow"></div>
 
-  <!-- Timer -->
-  <div class="timer-card">
-    <p id="timerLabel">Focus Time</p>
+    <!-- Desk UI -->
+    <div id="desk">
+      <h1 class="title">Chill With You ☕</h1>
+      <p class="status">Chilling… 🎧</p>
 
-    <div class="progress-ring">
-      <svg width="120" height="120">
-        <circle class="bg" cx="60" cy="60" r="54"></circle>
-        <circle class="progress" cx="60" cy="60" r="54"></circle>
-      </svg>
-      <span id="timer">25:00</span>
+      <!-- Controls -->
+      <button id="focusBtn">Focus Mode</button>
+      <button id="rainBtn">Rain</button>
+
+      <!-- Sliders -->
+      <div class="slider">
+        <label>Lofi Volume</label>
+        <input type="range" id="lofiVol" min="0" max="1" step="0.01" value="0.6">
+      </div>
+
+      <div class="slider">
+        <label>Rain Volume</label>
+        <input type="range" id="rainVol" min="0" max="1" step="0.01" value="0.4">
+      </div>
+
+      <!-- Pomodoro -->
+      <div id="pomodoro">
+        <p id="timerLabel">Focus Time</p>
+        <p id="timer">25:00</p>
+        <button id="startPause">Start</button>
+        <button id="reset">Reset</button>
+      </div>
     </div>
-
-    <div class="timer-actions">
-      <button id="startPause">Start</button>
-      <button id="reset">Reset</button>
-    </div>
-  </div>
-  
-<div class="lamp"></div>
-<div class="rain-window"></div>
-
-  <!-- Sound Controls -->
-  <div class="controls">
-    <button id="toggleFocus">Focus Mode</button>
-    <button id="toggleRain">Rain</button>
-
-    <label>Lofi</label>
-    <input type="range" id="lofiVolume" min="0" max="1" step="0.01">
-
-    <label>Rain</label>
-    <input type="range" id="rainVolume" min="0" max="1" step="0.01">
-  </div>
-</div>
-
 
     <!-- Companion -->
     <div id="companion">👋 Hello! Ready to focus?</div>
   </div>
 
-  <!-- Audio -->
-  <audio id="lofi" src="assets/audio/lofi.mp3" loop></audio>
-  <audio id="rain" src="assets/audio/rain.mp3" loop></audio>
-  <audio id="fireplace" src="assets/audio/fireplace.mp3" loop></audio>
-  <audio id="bellFocus" src="assets/audio/bellFocus.mp3" preload="auto"></audio>
-  <audio id="bellBreak" src="assets/audio/bellBreak.mp3" preload="auto"></audio>
+  <!-- Audio (DO NOT duplicate IDs) -->
+  <audio id="lofi" src="assets/audio/lofi.mp3" loop preload="auto"></audio>
+  <audio id="rainAudio" src="assets/audio/rain.mp3" loop preload="auto"></audio>
+  <audio id="bellFocus" src="assets/audio/bellFocus.mp3"></audio>
+  <audio id="bellBreak" src="assets/audio/bellBreak.mp3"></audio>
 
   <!-- JS -->
   <script src="js/app.js"></script>
