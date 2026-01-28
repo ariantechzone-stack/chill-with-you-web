@@ -1,112 +1,172 @@
-/* ==========================
-   Cozy Chill – app.js
-   ========================== */
-
+// ==========================
+// Elements
+// ==========================
 const scene = document.getElementById("scene");
-const rainWindow = document.querySelector(".rain-window");
 
-/* Audio */
 const lofi = document.getElementById("lofi");
-const rain = document.getElementById("rain");
-const lofiVol = document.getElementById("lofiVolume");
-const rainVol = document.getElementById("rainVolume");
+const rain = document.getElementById("rainAudio");
+const bellFocus = document.getElementById("bellFocus");
+const bellBreak = document.getElementById("bellBreak");
 
-let unlocked = false;
+const focusBtn = document.getElementById("focusBtn");
+const rainBtn = document.getElementById("rainBtn");
+
+const lofiVol = document.getElementById("lofiVol");
+const rainVol = document.getElementById("rainVol");
+
+const timerEl = document.getElementById("timer");
+const timerLabel = document.getElementById("timerLabel");
+const startPauseBtn = document.getElementById("startPause");
+const resetBtn = document.getElementById("reset");
+
+// ==========================
+// State
+// ==========================
+let audioUnlocked = false;
 let focusOn = false;
+let rainOn = false;
 
-/* Unlock audio */
-document.body.addEventListener("click", () => {
-  if (unlocked) return;
-  [lofi, rain].forEach(a => {
+let focusTime = 25 * 60;
+let breakTime = 5 * 60;
+let timeLeft = focusTime;
+let isFocus = true;
+let running = false;
+let interval = null;
+
+// ==========================
+// Unlock Audio (REQUIRED)
+// ==========================
+function unlockAudio() {
+  if (audioUnlocked) return;
+
+  [lofi, rain, bellFocus, bellBreak].forEach(a => {
     a.volume = 0;
-    a.play().then(() => a.pause()).catch(()=>{});
+    a.play().then(() => {
+      a.pause();
+      a.volume = 1;
+    }).catch(() => {});
   });
-  unlocked = true;
-}, { once: true });
 
-/* Smooth fade */
-function fadeIn(audio, vol) {
-  audio.volume = 0;
-  audio.play();
-  let v = 0;
-  const i = setInterval(() => {
-    v += 0.05;
-    audio.volume = Math.min(vol, v);
-    if (v >= vol) clearInterval(i);
-  }, 60);
+  audioUnlocked = true;
 }
 
-function fadeOut(audio) {
-  let v = audio.volume;
-  const i = setInterval(() => {
-    v -= 0.05;
-    audio.volume = Math.max(0, v);
-    if (v <= 0) {
-      audio.pause();
-      clearInterval(i);
+document.addEventListener("click", unlockAudio, { once: true });
+
+// ==========================
+// Crossfade
+// ==========================
+function crossFade(from, to, targetVolume) {
+  const step = 0.02;
+
+  to.volume = 0;
+  to.play();
+
+  const fade = setInterval(() => {
+    from.volume = Math.max(0, from.volume - step);
+    to.volume = Math.min(targetVolume, to.volume + step);
+
+    if (to.volume >= targetVolume) {
+      from.pause();
+      clearInterval(fade);
     }
-  }, 60);
+  }, 50);
 }
 
-/* Focus */
-document.getElementById("toggleFocus").onclick = () => {
+// ==========================
+// Focus Button
+// ==========================
+focusBtn.onclick = () => {
+  unlockAudio();
   focusOn = !focusOn;
 
   if (focusOn) {
-    scene.classList.add("night");
-    fadeIn(lofi, lofiVol.value);
+    focusBtn.textContent = "Stop Focus";
+    scene.className = "sunset";
+
+    setTimeout(() => {
+      scene.className = "night";
+      crossFade(rain, lofi, lofiVol.value);
+    }, 3000);
+
   } else {
-    scene.classList.remove("night");
-    fadeOut(lofi);
+    focusBtn.textContent = "Focus Mode";
+    lofi.pause();
+    scene.className = "day";
   }
 };
 
-/* Rain */
-document.getElementById("toggleRain").onclick = () => {
-  rainWindow.classList.toggle("active");
+// ==========================
+// Rain Button
+// ==========================
+rainBtn.onclick = () => {
+  unlockAudio();
+  rainOn = !rainOn;
 
-  if (rainWindow.classList.contains("active")) {
-    fadeIn(rain, rainVol.value);
+  if (rainOn) {
+    rain.volume = rainVol.value;
+    rain.play();
+    rainBtn.textContent = "Rain Off";
   } else {
-    fadeOut(rain);
+    rain.pause();
+    rainBtn.textContent = "Rain";
   }
 };
 
-/* Volume */
-lofiVol.oninput = e => (lofi.volume = e.target.value);
-rainVol.oninput = e => (rain.volume = e.target.value);
+// ==========================
+// Volume Controls
+// ==========================
+lofiVol.oninput = () => lofi.volume = lofiVol.value;
+rainVol.oninput = () => rain.volume = rainVol.value;
 
-/* Pomodoro (simple + stable) */
-let time = 25 * 60;
-let running = false;
-let timer;
-
-const timerEl = document.getElementById("timer");
-
-function renderTime() {
-  const m = Math.floor(time / 60);
-  const s = time % 60;
-  timerEl.textContent = `${m}:${s.toString().padStart(2,"0")}`;
+// ==========================
+// Pomodoro
+// ==========================
+function updateTimer() {
+  const m = String(Math.floor(timeLeft / 60)).padStart(2, "0");
+  const s = String(timeLeft % 60).padStart(2, "0");
+  timerEl.textContent = `${m}:${s}`;
 }
 
-document.getElementById("startPause").onclick = () => {
-  running = !running;
+function switchMode() {
+  isFocus = !isFocus;
+  timeLeft = isFocus ? focusTime : breakTime;
+  timerLabel.textContent = isFocus ? "Focus Time" : "Break Time";
 
-  if (running) {
-    timer = setInterval(() => {
-      if (time > 0) time--;
-      renderTime();
+  if (!isFocus) {
+    lofi.pause(); // auto pause on break
+    bellBreak.play();
+    scene.className = "sunset";
+  } else {
+    bellFocus.play();
+    scene.className = "night";
+  }
+}
+
+startPauseBtn.onclick = () => {
+  if (!running) {
+    running = true;
+    startPauseBtn.textContent = "Pause";
+    interval = setInterval(() => {
+      timeLeft--;
+      updateTimer();
+      if (timeLeft <= 0) switchMode();
     }, 1000);
   } else {
-    clearInterval(timer);
+    running = false;
+    startPauseBtn.textContent = "Start";
+    clearInterval(interval);
   }
 };
 
-document.getElementById("reset").onclick = () => {
-  clearInterval(timer);
+resetBtn.onclick = () => {
+  clearInterval(interval);
   running = false;
-  time = 25 * 60;
-  renderTime();
+  isFocus = true;
+  timeLeft = focusTime;
+  timerLabel.textContent = "Focus Time";
+  startPauseBtn.textContent = "Start";
+  updateTimer();
+  scene.className = "day";
 };
 
-renderTime();
+updateTimer();
