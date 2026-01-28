@@ -1,32 +1,34 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <link rel="icon" href="data:,">
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>Chill With You</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Favicon -->
+  <link rel="icon" href="data:,">
 
   <!-- Fonts -->
   <link rel="stylesheet" href="assets/fonts/inter.woff2">
 
   <!-- CSS -->
   <link rel="stylesheet" href="css/style.css">
-  
 </head>
 <body>
+  <!-- Scene / Background -->
   <div id="scene">
-    <!-- Weather layers -->
+    <!-- Weather Layers -->
     <div id="weatherRain" class="weather-layer"></div>
     <div id="weatherSnow" class="weather-layer"></div>
     <div id="weatherWind" class="weather-layer"></div>
 
-    <!-- Fireplace / candle glow -->
+    <!-- Fireplace / Candle Glow -->
     <div class="fireplace-flicker"></div>
 
-    <!-- Window glow -->
+    <!-- Window Glow -->
     <div class="window-glow"></div>
 
-    <!-- Rain visual -->
+    <!-- Rain Visual -->
     <div class="rain"></div>
 
     <!-- Desk / Controls -->
@@ -37,22 +39,30 @@
       <button id="toggleFocus">Focus Mode</button>
       <button id="toggleRain">Rain</button>
 
-      <!-- Volume sliders -->
+      <!-- Volume Sliders -->
       <div>
-        <label>Lofi Volume</label>
+        <label for="lofiVolume">Lofi Volume</label>
         <input type="range" id="lofiVolume" min="0" max="1" step="0.01" value="0.6">
       </div>
       <div>
-        <label>Rain Volume</label>
+        <label for="rainVolume">Rain Volume</label>
         <input type="range" id="rainVolume" min="0" max="1" step="0.01" value="0.4">
       </div>
 
-      <!-- Pomodoro -->
+      <!-- Pomodoro Timer -->
       <div id="pomodoro">
         <p id="timerLabel">Focus Time</p>
         <p id="timer">25:00</p>
         <button id="startPause">Start</button>
         <button id="reset">Reset</button>
+      </div>
+
+      <!-- XP / Level Panel -->
+      <div id="xpPanel">
+        <p>Level: <span id="levelValue">1</span></p>
+        <p>XP: <span id="xpValue">0</span></p>
+        <div id="xpFill" style="height:8px;background:#ffd166;width:0%;border-radius:4px;"></div>
+        <div id="achievements"></div>
       </div>
     </div>
 
@@ -61,11 +71,12 @@
   </div>
 
   <!-- Audio -->
-  <audio id="lofi" loop>
-  <source src="assets/audio/lofi.mp3" type="audio/mpeg">
-</audio>
+  <audio id="lofi" src="assets/audio/lofi.mp3" loop></audio>
   <audio id="rain" src="assets/audio/rain.mp3" loop></audio>
-  
+  <audio id="fireplace" src="assets/audio/fireplace.mp3" loop></audio>
+  <audio id="bellFocus" src="assets/audio/bellFocus.mp3" preload="auto"></audio>
+  <audio id="bellBreak" src="assets/audio/bellBreak.mp3" preload="auto"></audio>
+
   <!-- JS -->
   <script src="js/app.js"></script>
 </body>
