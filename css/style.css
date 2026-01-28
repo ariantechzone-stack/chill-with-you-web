@@ -1,6 +1,6 @@
-/* ========================== */
-/* Base Reset & Fonts */
-/* ========================== */
+/* ==========================
+   Base
+   ========================== */
 * {
   margin: 0;
   padding: 0;
@@ -11,357 +11,135 @@ html, body {
   width: 100%;
   height: 100%;
   font-family: 'Inter', sans-serif;
-  background: #f0f0f0;
-  color: #333;
   overflow: hidden;
+  background: #000;
+  color: #f5f5f5;
 }
 
-/* Buttons */
-button {
-  cursor: pointer;
-  font-family: inherit;
-  padding: 0.6em 1.2em;
-  border-radius: 8px;
-  border: none;
-  background: rgba(255, 209, 102, 0.9); /* gold */
-  color: #111;
-  font-weight: bold;
-  transition: transform 0.2s ease, background 0.3s ease;
-}
-
-button:hover {
-  transform: scale(1.05);
-  background: rgba(6, 214, 160, 0.9); /* teal hover */
-}
-
-/* Paragraphs */
-p {
-  margin: 0.2em 0;
-}
-
-/* ========================== */
-/* Color Variables */
-/* ========================== */
+/* ==========================
+   Scene & moods
+   ========================== */
 :root {
-  --primary-color: #ffd166;
-  --secondary-color: #06d6a0;
-  --background-day: #a3d2ca;
-  --background-night: #1a1a2e;
-  --fireplace-color: rgba(255, 180, 100, 0.2);
-  --text-light: #fff;
-  --text-dark: #111;
+  --day: #a3d2ca;
+  --night: #0f1020;
 }
 
-/* ========================== */
-/* Scene / Background */
-/* ========================== */
 #scene {
   position: relative;
   width: 100%;
   height: 100vh;
-  overflow: hidden;
-  transition: background 3s ease-in-out, filter 1s ease;
-  background: var(--background-day);
+  background: var(--day);
+  transition: background 3s ease-in-out;
 }
+
+#scene.night {
+  background: var(--night);
+}
+
+/* Dark overlay (eye comfort) */
 #scene::after {
   content: "";
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0);
+  background: rgba(0,0,0,0);
   pointer-events: none;
-  transition: background 3s ease-in-out;
+  transition: background 3s ease;
 }
 
 #scene.night::after {
-  background: rgba(0, 0, 0, 0.45);
+  background: rgba(0,0,0,0.45);
 }
 
-
-#scene.night {
-  background: var(--background-night);
-}
-
-/* ========================== */
-/* Stars / Night Sky */
-/* ========================== */
-#scene.night::before {
-  content: '';
+/* ==========================
+   Cozy lamp
+   ========================== */
+.lamp {
   position: absolute;
-  width: 2px;
-  height: 2px;
-  background: white;
-  border-radius: 50%;
-  box-shadow: 50px 100px white, 150px 200px white, 300px 50px white, 400px 150px white, 600px 80px white, 700px 220px white;
-  animation: twinkle 2s infinite alternate;
-  pointer-events: none;
-}
-
-@keyframes twinkle {
-  0% { opacity: 0.3; }
-  100% { opacity: 1; }
-}
-
-/* Window Glow */
-.window-glow {
-  position: absolute;
-  top: 20%;
+  top: 15%;
   left: 50%;
-  width: 300px;
-  height: 400px;
+  width: 120px;
+  height: 120px;
   transform: translateX(-50%);
-  background: rgba(255, 255, 180, 0.1);
-  filter: blur(40px);
-  pointer-events: none;
-  animation: glowPulse 3s ease-in-out infinite alternate;
-}
-
-@keyframes glowPulse {
-  0% { opacity: 0.2; }
-  50% { opacity: 0.5; }
-  100% { opacity: 0.2; }
-}
-
-/* Fireplace Flicker */
-.fireplace-flicker {
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  width: 400px;
-  height: 200px;
-  transform: translateX(-50%);
-  background: var(--fireplace-color);
   border-radius: 50%;
-  filter: blur(50px);
-  animation: flicker 1s infinite alternate;
-  pointer-events: none;
-}
-
-@keyframes flicker {
-  0% { opacity: 0.3; }
-  100% { opacity: 0.6; }
-}
-
-/* Weather Layers */
-.weather-layer {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
+  background: radial-gradient(
+    circle,
+    rgba(255, 200, 120, 0.7) 0%,
+    rgba(255, 200, 120, 0.25) 40%,
+    rgba(255, 200, 120, 0.05) 70%
+  );
+  filter: blur(8px);
+  animation: lampBreath 4s ease-in-out infinite;
   opacity: 0;
-  transition: opacity 0.5s ease;
+  transition: opacity 2s ease;
 }
 
-.weather-layer.active {
+#scene.night .lamp {
   opacity: 1;
 }
 
-/* ========================== */
-/* Desk / Controls */
-/* ========================== */
+@keyframes lampBreath {
+  0% { transform: translateX(-50%) scale(1); }
+  50% { transform: translateX(-50%) scale(1.08); }
+  100% { transform: translateX(-50%) scale(1); }
+}
+
+/* ==========================
+   Rain window
+   ========================== */
+.rain-window {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(
+      rgba(255,255,255,0.15) 1px,
+      transparent 1px
+    );
+  background-size: 2px 20px;
+  animation: rainFall 0.6s linear infinite;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 1.5s ease;
+}
+
+.rain-window.active {
+  opacity: 0.35;
+}
+
+@keyframes rainFall {
+  from { background-position: 0 0; }
+  to { background-position: 0 20px; }
+}
+
+/* ==========================
+   Desk UI
+   ========================== */
 #desk {
   position: absolute;
-  bottom: 10%;
+  bottom: 8%;
   left: 50%;
   transform: translateX(-50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  color: var(--text-light);
-  text-shadow: 0 0 5px rgba(0,0,0,0.7);
-}
-
-/* Status */
-.status {
-  font-weight: bold;
-  font-size: 1.2rem;
   text-align: center;
-  text-shadow: 0 0 5px rgba(0,0,0,0.7);
+  background: rgba(0,0,0,0.35);
+  backdrop-filter: blur(10px);
+  padding: 20px 26px;
+  border-radius: 16px;
 }
 
-/* Pomodoro */
-#pomodoro {
-  margin-top: 15px;
-  text-align: center;
-  color: var(--text-light);
+button {
+  background: #ffd166;
+  border: none;
+  border-radius: 10px;
+  padding: 8px 14px;
+  margin: 5px;
+  font-weight: 600;
+  cursor: pointer;
 }
 
-#timerLabel {
-  font-size: 1rem;
-  margin-bottom: 5px;
-  text-shadow: 0 0 5px rgba(0,0,0,0.7);
+button:hover {
+  background: #ffbe0b;
 }
 
 #timer {
   font-size: 2rem;
   font-weight: bold;
-  text-shadow: 0 0 6px rgba(0,0,0,0.8);
-}
-
-/* Pomodoro buttons */
-#pomodoro button {
-  margin: 5px;
-}
-
-/* ========================== */
-/* Sliders */
-input[type="range"] {
-  width: 150px;
-  accent-color: var(--primary-color);
-}
-
-/* ========================== */
-/* Companion */
-#companion {
-  position: absolute;
-  bottom: 25%;
-  right: 5%;
-  width: 150px;
-  height: 150px;
-  background: rgba(255,255,255,0.1);
-  border-radius: 15px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.9rem;
-  text-align: center;
-  padding: 8px;
-  animation: companionIdle 3s infinite;
-  color: var(--text-light);
-  text-shadow: 0 0 5px rgba(0,0,0,0.7);
-}
-
-@keyframes companionIdle {
-  0%,100% { transform: translateY(0px); }
-  50% { transform: translateY(-5px); }
-}
-
-/* ========================== */
-/* XP / Level Panel */
-#xpPanel {
-  position: absolute;
-  top: 10%;
-  right: 5%;
-  width: 180px;
-  background: rgba(0,0,0,0.3);
-  padding: 8px;
-  border-radius: 10px;
-  color: var(--text-light);
-  text-shadow: 0 0 5px rgba(0,0,0,0.7);
-  font-weight: bold;
-}
-
-/* ========================== */
-/* Classes / Options Buttons */
-.class-btn {
-  margin: 5px;
-  padding: 0.5em 1em;
-  border-radius: 6px;
-  border: none;
-  background: rgba(255,209,102,0.9);
-  color: #111;
-  font-weight: bold;
-  transition: transform 0.2s ease, background 0.3s ease;
-}
-
-.class-btn:hover {
-  transform: scale(1.05);
-  background: rgba(6,214,160,0.9);
-}
-
-/* ========================== */
-/* Day/Night Text Color Handling */
-#scene.day #desk, 
-#scene.day #companion,
-#scene.day .status,
-#scene.day #xpPanel,
-#scene.day #timer {
-  color: var(--text-dark);
-  text-shadow: 0 0 3px rgba(255,255,255,0.3);
-}
-
-#scene.night #desk,
-#scene.night #companion,
-#scene.night .status,
-#scene.night #xpPanel,
-#scene.night #timer {
-  color: var(--text-light);
-  text-shadow: 0 0 5px rgba(0,0,0,0.7);
-}
-
-/* ========== Glass Desk ========== */
-.glass {
-  background: rgba(255,255,255,0.12);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border-radius: 18px;
-  padding: 20px 24px;
-  min-width: 280px;
-  box-shadow: 0 10px 40px rgba(0,0,0,0.25);
-}
-
-/* Status */
-.status {
-  text-align: center;
-  font-size: 1.2rem;
-  margin-bottom: 12px;
-}
-
-/* Timer Card */
-.timer-card {
-  text-align: center;
-  margin-bottom: 16px;
-}
-
-/* Progress Ring */
-.progress-ring {
-  position: relative;
-  width: 120px;
-  height: 120px;
-  margin: 0 auto 10px;
-}
-
-.progress-ring svg {
-  transform: rotate(-90deg);
-}
-
-.progress-ring circle {
-  fill: none;
-  stroke-width: 8;
-}
-
-.progress-ring .bg {
-  stroke: rgba(255,255,255,0.2);
-}
-
-.progress-ring .progress {
-  stroke: #ffd166;
-  stroke-dasharray: 339;
-  stroke-dashoffset: 339;
-  transition: stroke-dashoffset 0.5s linear;
-}
-
-/* Timer text */
-.progress-ring span {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.8rem;
-  font-weight: bold;
-}
-
-/* Buttons */
-.timer-actions button {
-  margin: 6px;
-}
-
-/* Controls */
-.controls {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
 }
