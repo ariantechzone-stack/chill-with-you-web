@@ -1,5 +1,5 @@
 // ==========================
-// ELEMENTS
+// DOM Elements
 // ==========================
 const lofi = document.getElementById("lofi");
 const rain = document.getElementById("rain");
@@ -9,269 +9,225 @@ const bellBreak = document.getElementById("bellBreak");
 
 const focusBtn = document.getElementById("toggleFocus");
 const rainBtn = document.getElementById("toggleRain");
+const startPauseBtn = document.getElementById("startPause");
+const resetBtn = document.getElementById("reset");
+
+const timerDisplay = document.getElementById("timer");
+const timerLabel = document.getElementById("timerLabel");
 
 const lofiSlider = document.getElementById("lofiVolume");
 const rainSlider = document.getElementById("rainVolume");
 
-const timerDisplay = document.getElementById("timer");
-const timerLabel = document.getElementById("timerLabel");
-const startPauseBtn = document.getElementById("startPause");
-const resetBtn = document.getElementById("reset");
+const scene = document.getElementById("scene");
 
-const companionEl = document.getElementById("companion");
-
+// ==========================
+// State
+// ==========================
+let audioUnlocked = false;
 let lofiPlaying = false;
 let rainPlaying = false;
-let fireplacePlaying = false;
-let audioUnlocked = false;
 
-// Pomodoro
-let focusTime = 25*60;
-let breakTime = 5*60;
+let focusTime = 25 * 60;
+let breakTime = 5 * 60;
 let timeLeft = focusTime;
 let isFocus = true;
 let isRunning = false;
 let interval = null;
 
-// Night mode
-const NIGHT_HOUR = 20; // 8 PM
-let nightModeActive = false;
-
-// XP / Achievements
-const XP_KEY = "chillXP";
-let xpState = JSON.parse(localStorage.getItem(XP_KEY)) || {
-  xp: 0,
-  level: 1,
-  achievements: []
-};
-
-// Companion
-let companionClass = "monk";
-const companionMessages = {
-  monk: ["Focus on your breath...", "Patience is key."],
-  scholar: ["Time to learn!", "Absorb knowledge slowly."],
-  nightOwl: ["The night is productive.", "Keep coding!"]
-};
-
 // ==========================
-// UTILITY FUNCTIONS
+// Unlock audio once per page
 // ==========================
-function unlockAudio() {
+document.addEventListener("click", () => {
   if (audioUnlocked) return;
-  [lofi, rain, fireplace, bellFocus, bellBreak].forEach(a => {
-    a.muted = true;
-    a.play().then(() => { a.pause(); a.muted = false; }).catch(()=>{});
-  });
-  audioUnlocked = true;
-}
+  [lofi, rain, fireplace, bellFocus, bellBreak].forEach(a => a.muted = true);
+  lofi.play().then(() => {
+    lofi.pause();
+    [lofi, rain, fireplace, bellFocus, bellBreak].forEach(a => a.muted = false);
+    audioUnlocked = true;
+  }).catch(() => {});
+}, { once: true });
 
-function fade(audio, from, to, duration = 600) {
-  const steps = 30;
-  const stepTime = duration / steps;
-  const delta = (to - from) / steps;
-  let current = from;
-
-  audio.volume = from;
-  const interval = setInterval(() => {
-    current += delta;
-    audio.volume = Math.max(0, Math.min(1, current));
-    if ((delta > 0 && current >= to) || (delta < 0 && current <= to)) {
-      audio.volume = to;
-      clearInterval(interval);
+// ==========================
+// Helper: Smooth volume change
+// ==========================
+function crossfade(audio, targetVolume, step = 0.02, callback) {
+  clearInterval(audio._fadeInterval);
+  audio._fadeInterval = setInterval(() => {
+    if (Math.abs(audio.volume - targetVolume) < step) {
+      audio.volume = targetVolume;
+      clearInterval(audio._fadeInterval);
+      if (callback) callback();
+    } else {
+      audio.volume += audio.volume < targetVolume ? step : -step;
     }
-  }, stepTime);
-}
-
-function playBell(isFocus) {
-  const bell = isFocus ? bellFocus : bellBreak;
-  bell.currentTime = 0;
-  bell.volume = 0.5;
-  bell.play().catch(()=>{});
-}
-
-function updateTimerDisplay() {
-  const m = String(Math.floor(timeLeft/60)).padStart(2,"0");
-  const s = String(timeLeft%60).padStart(2,"0");
-  timerDisplay.textContent = `${m}:${s}`;
-}
-
-function checkNightMode() {
-  const h = new Date().getHours();
-  return h >= NIGHT_HOUR;
+  }, 50);
 }
 
 // ==========================
-// AUDIO CONTROLS
+// Focus Toggle
 // ==========================
 focusBtn.addEventListener("click", () => {
-  unlockAudio();
+  if (!audioUnlocked) return;
   if (!lofiPlaying) {
-    lofi.currentTime = 0;
-    lofi.play();
-    fade(lofi, 0, parseFloat(lofiSlider.value));
+    lofi.volume = parseFloat(lofiSlider.value);
+    lofi.play().catch(()=>{});
     focusBtn.textContent = "Stop Focus";
     lofiPlaying = true;
   } else {
-    fade(lofi, lofi.volume, 0);
-    setTimeout(() => lofi.pause(), 600);
+    crossfade(lofi, 0, 0.02, () => lofi.pause());
     focusBtn.textContent = "Focus Mode";
     lofiPlaying = false;
   }
 });
 
+// ==========================
+// Rain Toggle
+// ==========================
 rainBtn.addEventListener("click", () => {
-  unlockAudio();
+  if (!audioUnlocked) return;
   if (!rainPlaying) {
-    rain.currentTime = 0;
-    rain.play();
-    fade(rain, 0, parseFloat(rainSlider.value));
-    if (lofiPlaying) fade(lofi, lofi.volume, 0.2); // duck Lofi
+    rain.volume = parseFloat(rainSlider.value);
+    rain.play().catch(()=>{});
     rainBtn.textContent = "Rain Off";
+    document.querySelector(".rain").classList.add("active");
     rainPlaying = true;
   } else {
-    fade(rain, rain.volume, 0);
-    setTimeout(() => rain.pause(), 600);
-    if (lofiPlaying) fade(lofi, lofi.volume, parseFloat(lofiSlider.value));
+    crossfade(rain, 0, 0.02, () => rain.pause());
     rainBtn.textContent = "Rain";
+    document.querySelector(".rain").classList.remove("active");
     rainPlaying = false;
   }
 });
 
+// ==========================
+// Volume Sliders
+// ==========================
 lofiSlider.addEventListener("input", () => {
-  if (lofiPlaying) lofi.volume = parseFloat(lofiSlider.value);
+  lofi.volume = parseFloat(lofiSlider.value);
 });
 
 rainSlider.addEventListener("input", () => {
-  if (rainPlaying) rain.volume = parseFloat(rainSlider.value);
+  rain.volume = parseFloat(rainSlider.value);
 });
 
 // ==========================
-// NIGHT MODE AUDIO
+// Pomodoro Functions
 // ==========================
-function updateNightAudio() {
-  nightModeActive = checkNightMode();
-  if (nightModeActive) {
-    if (!rainPlaying) { rain.currentTime = 0; rain.play(); fade(rain, 0, parseFloat(rainSlider.value)); rainPlaying=true; }
-    if (!fireplacePlaying) { fireplace.currentTime=0; fireplace.play(); fade(fireplace,0,0.3); fireplacePlaying=true; }
-    if (lofiPlaying) fade(lofi, lofi.volume, 0.2);
-  } else {
-    if (rainPlaying && !rainBtn.classList.contains("active")) { fade(rain,rain.volume,0); setTimeout(()=>rain.pause(),600); rainPlaying=false; }
-    if (fireplacePlaying) { fade(fireplace,fireplace.volume,0); setTimeout(()=>fireplace.pause(),600); fireplacePlaying=false; }
-    if (lofiPlaying) fade(lofi,lofi.volume,parseFloat(lofiSlider.value));
-  }
+function updateTimerDisplay() {
+  const m = String(Math.floor(timeLeft / 60)).padStart(2, "0");
+  const s = String(timeLeft % 60).padStart(2, "0");
+  timerDisplay.textContent = `${m}:${s}`;
 }
 
-// ==========================
-// POMODORO TIMER
-// ==========================
 function switchPomodoroMode() {
   isFocus = !isFocus;
   timeLeft = isFocus ? focusTime : breakTime;
   timerLabel.textContent = isFocus ? "Focus Time" : "Break Time";
 
-  playBell(isFocus);
-
-  // Auto pause Lofi on break
-  if (!isFocus && lofiPlaying) { fade(lofi,lofi.volume,0); setTimeout(()=>lofi.pause(),600); }
-  else if (isFocus && lofiPlaying) { lofi.play(); fade(lofi,0,parseFloat(lofiSlider.value)); }
-
-  updateNightAudio();
-  saveTimerState();
-}
-
-function startPauseTimer() {
-  if (!isRunning) {
-    isRunning = true;
-    startPauseBtn.textContent = "Pause";
-    interval = setInterval(() => {
-      timeLeft--;
-      updateTimerDisplay();
-      if (timeLeft <= 0) switchPomodoroMode();
-    }, 1000);
+  if (isFocus) {
+    bellBreak.currentTime = 0;
+    bellBreak.play().catch(() => {});
+    // Lofi auto-play on focus
+    if (!lofiPlaying) {
+      lofi.play().catch(() => {});
+      lofiPlaying = true;
+      focusBtn.textContent = "Stop Focus";
+    }
   } else {
-    clearInterval(interval);
-    isRunning = false;
-    startPauseBtn.textContent = "Start";
+    bellFocus.currentTime = 0;
+    bellFocus.play().catch(() => {});
+    // Lofi auto-pause on break
+    crossfade(lofi, 0, 0.02, () => {
+      lofi.pause();
+      lofiPlaying = false;
+      focusBtn.textContent = "Focus Mode";
+    });
   }
+
   saveTimerState();
 }
 
-function resetTimer() {
-  clearInterval(interval);
+function startTimer() {
+  if (isRunning) return;
+  isRunning = true;
+  startPauseBtn.textContent = "Pause";
+  interval = setInterval(() => {
+    timeLeft--;
+    updateTimerDisplay();
+    if (timeLeft <= 0) switchPomodoroMode();
+  }, 1000);
+}
+
+function pauseTimer() {
+  if (!isRunning) return;
   isRunning = false;
-  isFocus = true;
+  startPauseBtn.textContent = "Start";
+  clearInterval(interval);
+}
+
+startPauseBtn.addEventListener("click", () => {
+  if (!audioUnlocked) return;
+  if (!isRunning) startTimer();
+  else pauseTimer();
+});
+
+resetBtn.addEventListener("click", () => {
+  pauseTimer();
   timeLeft = focusTime;
+  isFocus = true;
   timerLabel.textContent = "Focus Time";
   updateTimerDisplay();
-  saveTimerState();
+  // Ensure Lofi stops
+  crossfade(lofi, 0, 0.02, () => { lofi.pause(); lofiPlaying = false; focusBtn.textContent = "Focus Mode"; });
+});
 
-  if (lofiPlaying) { lofi.play(); fade(lofi,0,parseFloat(lofiSlider.value)); }
-  updateNightAudio();
-}
-
+// ==========================
+// Timer Save / Load (LocalStorage)
+// ==========================
 function saveTimerState() {
-  localStorage.setItem("pomodoroState", JSON.stringify({ isFocus,timeLeft,isRunning }));
+  localStorage.setItem("pomodoro", JSON.stringify({ timeLeft, isFocus, isRunning }));
 }
 
 function loadTimerState() {
-  const state = JSON.parse(localStorage.getItem("pomodoroState"));
+  const state = JSON.parse(localStorage.getItem("pomodoro"));
   if (!state) return;
-  isFocus = state.isFocus ?? true;
-  timeLeft = state.timeLeft ?? (isFocus?focusTime:breakTime);
+  timeLeft = state.timeLeft;
+  isFocus = state.isFocus;
   updateTimerDisplay();
-  if (state.isRunning) startPauseTimer();
+  if (state.isRunning) startTimer();
 }
 
-// ==========================
-// XP & ACHIEVEMENTS
-// ==========================
-function addXP(amount) {
-  xpState.xp += amount;
-  const needed = xpState.level * 200;
-  if (xpState.xp >= needed) {
-    xpState.xp -= needed;
-    xpState.level++;
-    addAchievement(`Reached level ${xpState.level}`);
-  }
-  saveXP();
-  updateXPUI();
-}
-
-function addAchievement(name) {
-  if (!xpState.achievements.includes(name)) {
-    xpState.achievements.push(name);
-    updateXPUI();
-  }
-}
-
-function saveXP() { localStorage.setItem(XP_KEY, JSON.stringify(xpState)); }
-
-function updateXPUI() {
-  const levelEl = document.getElementById("levelValue");
-  const xpEl = document.getElementById("xpValue");
-  const fillEl = document.getElementById("xpFill");
-  if (levelEl) levelEl.textContent = xpState.level;
-  if (xpEl) xpEl.textContent = xpState.xp;
-  if (fillEl) fillEl.style.width = `${(xpState.xp / (xpState.level*200))*100}%`;
-}
-
-// ==========================
-// COMPANION MESSAGES
-// ==========================
-function showCompanionMessage() {
-  const arr = companionMessages[companionClass] || ["Stay focused!"];
-  companionEl.textContent = arr[Math.floor(Math.random()*arr.length)];
-}
-
-// ==========================
-// INIT
-// ==========================
 window.addEventListener("load", () => {
-  unlockAudio();
   loadTimerState();
-  updateTimerDisplay();
-  updateNightAudio();
-  updateXPUI();
-  showCompanionMessage();
-  setInterval(updateNightAudio, 60*1000); // check every 1 min
 });
+
+// ==========================
+// Night Mode Auto Sound
+// ==========================
+function updateSceneNight(isNight) {
+  if (isNight) {
+    scene.classList.add("night");
+    if (!rainPlaying) {
+      rain.play().catch(()=>{});
+      rainPlaying = true;
+      rainBtn.textContent = "Rain Off";
+      document.querySelector(".rain").classList.add("active");
+    }
+  } else {
+    scene.classList.remove("night");
+    // Optionally stop rain in day mode
+    // crossfade(rain,0,0.02,()=>{rain.pause(); rainPlaying=false;});
+  }
+}
+
+// Example: Auto night mode at 8 PM
+setInterval(() => {
+  const h = new Date().getHours();
+  updateSceneNight(h >= 20 || h < 6);
+}, 60000);
+updateSceneNight(new Date().getHours() >= 20 || new Date().getHours() < 6);
+
+// ==========================
+// Initialize Display
+// ==========================
+updateTimerDisplay();
