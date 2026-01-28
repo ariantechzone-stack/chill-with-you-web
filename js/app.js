@@ -3,6 +3,7 @@
 // ==========================
 const lofi = document.getElementById("lofi");
 const rain = document.getElementById("rain");
+const fireplace = document.getElementById("fireplace");
 const bellFocus = document.getElementById("bellFocus");
 const bellBreak = document.getElementById("bellBreak");
 
@@ -19,9 +20,10 @@ const resetBtn = document.getElementById("reset");
 
 let lofiPlaying = false;
 let rainPlaying = false;
+let fireplacePlaying = false;
 let audioUnlocked = false;
 
-// Pomodoro variables
+// Pomodoro
 let focusTime = 25*60;
 let breakTime = 5*60;
 let timeLeft = focusTime;
@@ -29,12 +31,16 @@ let isFocus = true;
 let isRunning = false;
 let interval = null;
 
+// Night mode thresholds
+const NIGHT_HOUR = 20; // 8 PM
+let nightModeActive = false;
+
 // ==========================
 // UTILITY FUNCTIONS
 // ==========================
 function unlockAudio() {
   if (audioUnlocked) return;
-  [lofi, rain, bellFocus, bellBreak].forEach(a => {
+  [lofi, rain, fireplace, bellFocus, bellBreak].forEach(a => {
     a.muted = true;
     a.play().then(() => {
       a.pause();
@@ -44,7 +50,7 @@ function unlockAudio() {
   audioUnlocked = true;
 }
 
-// Smooth crossfade function
+// Smooth volume fade
 function fade(audio, from, to, duration = 600) {
   const steps = 30;
   const stepTime = duration / steps;
@@ -63,7 +69,7 @@ function fade(audio, from, to, duration = 600) {
   }, stepTime);
 }
 
-// Play bell sound
+// Play bell
 function playBell(isFocus) {
   const bell = isFocus ? bellFocus : bellBreak;
   bell.currentTime = 0;
@@ -78,12 +84,17 @@ function updateTimerDisplay(){
   timerDisplay.textContent = `${m}:${s}`;
 }
 
+// Check if current hour is night
+function checkNightMode() {
+  const h = new Date().getHours();
+  return h >= NIGHT_HOUR;
+}
+
 // ==========================
 // AUDIO CONTROLS
 // ==========================
 focusBtn.addEventListener("click", () => {
   unlockAudio();
-
   if (!lofiPlaying) {
     lofi.currentTime = 0;
     lofi.play();
@@ -100,18 +111,17 @@ focusBtn.addEventListener("click", () => {
 
 rainBtn.addEventListener("click", () => {
   unlockAudio();
-
   if (!rainPlaying) {
     rain.currentTime = 0;
     rain.play();
     fade(rain, 0, parseFloat(rainSlider.value));
-    if (lofiPlaying) fade(lofi, lofi.volume, 0.2); // lower lofi under rain
+    if (lofiPlaying) fade(lofi, lofi.volume, 0.2); // duck Lofi
     rainBtn.textContent = "Rain Off";
     rainPlaying = true;
   } else {
     fade(rain, rain.volume, 0);
     setTimeout(() => rain.pause(), 600);
-    if (lofiPlaying) fade(lofi, lofi.volume, parseFloat(lofiSlider.value)); // restore lofi
+    if (lofiPlaying) fade(lofi, lofi.volume, parseFloat(lofiSlider.value));
     rainBtn.textContent = "Rain";
     rainPlaying = false;
   }
@@ -125,6 +135,44 @@ lofiSlider.addEventListener("input", () => {
 rainSlider.addEventListener("input", () => {
   if (rainPlaying) rain.volume = parseFloat(rainSlider.value);
 });
+
+// ==========================
+// NIGHT MODE AUDIO
+// ==========================
+function updateNightAudio() {
+  nightModeActive = checkNightMode();
+  if (nightModeActive) {
+    // auto fade in rain if not already playing
+    if (!rainPlaying) {
+      rain.currentTime = 0;
+      rain.play();
+      fade(rain, 0, parseFloat(rainSlider.value));
+      rainPlaying = true;
+    }
+    // optional: fireplace
+    if (!fireplacePlaying) {
+      fireplace.currentTime = 0;
+      fireplace.play();
+      fade(fireplace, 0, 0.3);
+      fireplacePlaying = true;
+    }
+    // duck lofi if playing
+    if (lofiPlaying) fade(lofi, lofi.volume, 0.2);
+  } else {
+    // fade out rain and fireplace if night over
+    if (rainPlaying && !document.getElementById("toggleRain").classList.contains("active")) {
+      fade(rain, rain.volume, 0);
+      setTimeout(()=> rain.pause(), 600);
+      rainPlaying = false;
+    }
+    if (fireplacePlaying) {
+      fade(fireplace, fireplace.volume, 0);
+      setTimeout(()=> fireplace.pause(), 600);
+      fireplacePlaying = false;
+    }
+    if (lofiPlaying) fade(lofi, lofi.volume, parseFloat(lofiSlider.value));
+  }
+}
 
 // ==========================
 // POMODORO TIMER
@@ -145,6 +193,7 @@ function switchPomodoroMode(){
     fade(lofi, 0, parseFloat(lofiSlider.value));
   }
 
+  updateNightAudio();
   saveTimerState();
 }
 
@@ -197,12 +246,16 @@ function resetTimer(){
     lofi.play();
     fade(lofi, 0, parseFloat(lofiSlider.value));
   }
+  updateNightAudio();
 }
 
 // ==========================
 // INIT
 // ==========================
 window.addEventListener("load", () => {
+  unlockAudio();
   loadTimerState();
   updateTimerDisplay();
+  updateNightAudio();
+  setInterval(updateNightAudio, 60*1000); // check every 1 min
 });
