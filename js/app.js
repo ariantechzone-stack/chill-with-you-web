@@ -150,3 +150,11 @@ if (hour >= 22 || hour <= 5) {
   rain.play().catch(() => {});
   console.log("🌙 Night mode sound enabled");
 }
+
+const scene = document.getElementById("scene");
+
+if (focusOn) {
+  scene.classList.add("night");
+} else {
+  scene.classList.remove("night");
+}
